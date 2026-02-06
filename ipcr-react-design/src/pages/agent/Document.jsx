@@ -5,11 +5,14 @@ import CustomSelect from "../../components/CustomSelect";
 import documentLogo from "../../assets/upload.png";
 import { useAuth } from "../../components/AuthContext";
 import { useUploadDocuments } from "../../hooks/useDocuments";
+import { useUser } from "../../hooks/useUsers";
 
 const Document = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const uploadMutation = useUploadDocuments();
+  const userId = user?.id || user?.user_id || user?.userId;
+  const { data: userDetails, isLoading: userLoading } = useUser(userId);
   const [classification, setClassification] = useState("");
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -65,10 +68,12 @@ const Document = () => {
         }
       });
       
-      // Get agency ID - try multiple sources
-      const agencyId = user?.agency_id || user?.agencyId || localStorage.getItem('agencyId');
+      // Get agency ID from getById response (agencies array)
+      const agencyId =
+        userDetails?.agencies?.[0]?.id ||
+        userDetails?.agencies?.[0]?.agency_id;
       if (!agencyId) {
-        setErrorMessage('Unable to identify agency. Please log in again.');
+        setErrorMessage(userLoading ? 'Fetching agency details. Please try again.' : 'Unable to identify agency. Please log in again.');
         setShowError(true);
         return;
       }
@@ -138,7 +143,7 @@ const Document = () => {
         <img
           src={documentLogo}
           alt="Document Upload"
-          className="absolute top-1/2 right-6 -translate-y-1/2 h-48 w-48 object-contain opacity-20 drop-shadow-lg hidden md:block"
+          className="absolute top-1/2 right-6 -translate-y-1/2 h-40 w-40 md:h-48 md:w-48 object-contain opacity-70 drop-shadow-lg pointer-events-none"
         />
       </div>
 
