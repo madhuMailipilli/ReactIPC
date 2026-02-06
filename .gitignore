@@ -1,0 +1,10 @@
+node_modules/
+ipcr-react-design/node_modules/
+dist/
+build/
+.vite/
+.env
+*.log
+*.c
+*.d
+*.ps1
