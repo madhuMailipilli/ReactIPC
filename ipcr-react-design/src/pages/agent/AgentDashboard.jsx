@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DocumentTable from '../../components/DocumentTable';
 import PendingTasks from '../../components/PendingTasks';
 import { useAuth } from '../../components/AuthContext';
@@ -10,7 +9,6 @@ import apiService from '../../api/apiService';
 
 const AgentDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [selectedLob, setSelectedLob] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -108,18 +106,9 @@ const AgentDashboard = () => {
             <div>
               <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Hello, {user?.name || user?.username || 'Agent'}! 👋</h1>
               <h2 className="text-lg font-semibold text-white/90 mb-2">Welcome to Insurance Policy Processing.</h2>
-              <p className="text-white/70 text-[13px] font-medium leading-relaxed max-w-xl mb-4">
+              <p className="text-white/70 text-[13px] font-normal leading-relaxed max-w-xl">
                 Upload, validate, and process insurance policies with advanced tools and real-time tracking capabilities.
               </p>
-              <button 
-                onClick={() => navigate('/agent/Document')}
-                className="bg-white text-[#1B3C53] font-medium px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest flex items-center space-x-2 hover:bg-blue-50 transition-all duration-300 shadow-lg shadow-black/10 active:scale-95"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Upload Document</span>
-              </button>
             </div>
           </div>
         </div>
@@ -144,7 +133,7 @@ const AgentDashboard = () => {
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <p className="text-[9px] font-display font-medium text-slate-400 uppercase tracking-widest mb-0.5 whitespace-pre-line">{card.title}</p>
+                  <p className="text-[10px] font-display font-semibold text-slate-900 uppercase tracking-widest leading-tight">{card.title}</p>
                 </div>
                 <div className={`p-2.5 rounded-xl transition-all duration-500 ${
                   index === 0 ? 'bg-blue-50 text-blue-600 shadow-blue-100' :
