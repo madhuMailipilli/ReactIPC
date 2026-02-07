@@ -1,19 +1,47 @@
-import React from 'react';
-import { useAgencies } from '../hooks/useAgencies';
+import React, { useMemo } from "react";
+import { useAgencies } from "../hooks/useAgencies";
+import { useQueries } from "@tanstack/react-query";
+import { documentKeys } from "../hooks/useDocuments";
+import documentService from "../api/documentService";
 
 const AgencyStats = () => {
   const { data: agencies = [], isLoading } = useAgencies(false);
-  
-  const stats = {
-    totalAgencies: agencies.length,
-    totalUploads: 0,
-    recentUploads: agencies.slice(0, 8).map((agency, index) => ({
-      id: agency.id || agency.agency_id || index,
-      agency: agency.agency_name || 'Unknown Agency',
-      count: 0,
-      timestamp: 'Recently'
-    }))
-  };
+
+  const usageQueries = useQueries({
+    queries: agencies.map((agency) => ({
+      queryKey: documentKeys.usage(agency.id || agency.agency_id),
+      queryFn: () =>
+        documentService.getAgencyUsage(agency.id || agency.agency_id),
+      enabled: !!(agency.id || agency.agency_id),
+      staleTime: 30000,
+    })),
+  });
+
+  const stats = useMemo(() => {
+    const recentUploads = agencies.map((agency, index) => {
+      const agencyId = agency.id || agency.agency_id;
+      const usageData = usageQueries[index]?.data;
+      const count = usageData?.data?.documents_processed || 0;
+
+      return {
+        id: agencyId || index,
+        agency: agency.agency_name || "Unknown Agency",
+        count,
+        timestamp: "Recently",
+      };
+    });
+
+    const totalUploads = recentUploads.reduce(
+      (sum, upload) => sum + upload.count,
+      0,
+    );
+
+    return {
+      totalAgencies: agencies.length,
+      totalUploads,
+      recentUploads,
+    };
+  }, [agencies, usageQueries]);
 
   if (isLoading) {
     return (
@@ -28,7 +56,10 @@ const AgencyStats = () => {
           </div>
           <div className="space-y-2 pt-2">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-10 bg-slate-50 rounded-lg animate-pulse"></div>
+              <div
+                key={i}
+                className="h-10 bg-slate-50 rounded-lg animate-pulse"
+              ></div>
             ))}
           </div>
         </div>
@@ -39,10 +70,14 @@ const AgencyStats = () => {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 h-full flex flex-col overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-blue-900/5">
       <div className="p-4 border-b border-slate-50 bg-gradient-to-r from-white to-slate-50/30">
-        <h3 className="text-lg font-bold text-slate-900 tracking-tight">Agency Statistics</h3>
-        <p className="text-[10px] font-medium text-slate-500 mt-0.5">Overview and recent activity</p>
+        <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+          Agency Statistics
+        </h3>
+        <p className="text-[10px] font-medium text-slate-500 mt-0.5">
+          Overview and recent activity
+        </p>
       </div>
-      
+
       <div className="p-4 border-b border-slate-50 bg-slate-50/20">
         {/* Key Metrics - Static */}
         <div className="space-y-3">
@@ -50,11 +85,25 @@ const AgencyStats = () => {
             <div className="absolute top-0 right-0 w-12 h-12 bg-white/10 rounded-bl-2xl -mr-3 -mt-3 transition-transform group-hover:scale-110"></div>
             <div className="relative z-10 flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-white/80 mb-0.5">Total Agencies</p>
-                <p className="text-xl font-bold text-white">{stats.totalAgencies}</p>
+                <p className="text-sm font-bold text-white/80 mb-0.5">
+                  Total Agencies
+                </p>
+                <p className="text-xl font-bold text-white">
+                  {stats.totalAgencies}
+                </p>
               </div>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
               </svg>
             </div>
           </div>
@@ -62,20 +111,36 @@ const AgencyStats = () => {
           <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm relative overflow-hidden group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-slate-700 mb-0.5">Total Uploads</p>
-                <p className="text-xl font-bold text-[#1B3C53]">{stats.totalUploads.toLocaleString()}</p>
+                <p className="text-sm font-bold text-slate-700 mb-0.5">
+                  Total Uploads
+                </p>
+                <p className="text-xl font-bold text-[#1B3C53]">
+                  {stats.totalUploads.toLocaleString()}
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              <svg
+                className="w-5 h-5 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
               </svg>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
         {/* Recent Uploads - Scrollable */}
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           .custom-scrollbar::-webkit-scrollbar {
             width: 3px;
           }
@@ -89,18 +154,27 @@ const AgencyStats = () => {
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #CBD5E1;
           }
-        `}} />
+        `,
+          }}
+        />
         <div>
-          <h4 className="text-sm font-bold text-slate-700 mb-3">Recent Onboarding</h4>
+          <h4 className="text-sm font-bold text-slate-700 mb-3">
+            Recent Onboarding
+          </h4>
           <div className="space-y-2">
             {stats.recentUploads.map((upload) => (
-              <div key={upload.id} className="flex items-center justify-between p-3 bg-slate-200 rounded-xl">
+              <div
+                key={upload.id}
+                className="flex items-center justify-between p-3 bg-slate-200 rounded-xl"
+              >
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-[9px] font-medium text-[#1B3C53] shadow-sm">
                     {upload.agency?.charAt(0)}
                   </div>
                   <div className="truncate">
-                    <p className="text-xs font-medium text-slate-900 truncate">{upload.agency}</p>
+                    <p className="text-xs font-medium text-slate-900 truncate">
+                      {upload.agency}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
