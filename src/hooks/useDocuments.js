@@ -46,3 +46,14 @@ export const useAgencyUsage = (agencyId) => {
     staleTime: 30000,
   });
 };
+
+export const useSubscriptionUsage = () => {
+  return useQuery({
+    queryKey: ['subscriptionUsage'],
+    queryFn: async () => {
+      const response = await apiService.get('/subscriptions/usage?limit=100');
+      return response.data;
+    },
+    staleTime: 30000,
+  });
+};

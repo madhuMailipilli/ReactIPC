@@ -1,47 +1,34 @@
 import React, { useMemo } from "react";
+import { useSubscriptionUsage } from "../hooks/useDocuments";
 import { useAgencies } from "../hooks/useAgencies";
-import { useQueries } from "@tanstack/react-query";
-import { documentKeys } from "../hooks/useDocuments";
-import documentService from "../api/documentService";
 
 const AgencyStats = () => {
-  const { data: agencies = [], isLoading } = useAgencies(false);
+  const { data: response, isLoading: usageLoading } = useSubscriptionUsage();
+  const { data: agencies = [], isLoading: agenciesLoading } = useAgencies(false, 1, 1000, '', false);
+  const usageData = response?.data?.data || [];
 
-  const usageQueries = useQueries({
-    queries: agencies.map((agency) => ({
-      queryKey: documentKeys.usage(agency.id || agency.agency_id),
-      queryFn: () =>
-        documentService.getAgencyUsage(agency.id || agency.agency_id),
-      enabled: !!(agency.id || agency.agency_id),
-      staleTime: 30000,
-    })),
-  });
+  const isLoading = usageLoading || agenciesLoading;
 
   const stats = useMemo(() => {
-    const recentUploads = agencies.map((agency, index) => {
-      const agencyId = agency.id || agency.agency_id;
-      const usageData = usageQueries[index]?.data;
-      const count = usageData?.data?.documents_processed || 0;
+    const agencyMap = agencies.reduce((acc, agency) => {
+      acc[agency.id || agency.agency_id] = agency.agency_name;
+      return acc;
+    }, {});
 
-      return {
-        id: agencyId || index,
-        agency: agency.agency_name || "Unknown Agency",
-        count,
-        timestamp: "Recently",
-      };
-    });
+    const recentUploads = usageData.map((item) => ({
+      id: item.agency_id,
+      agency: agencyMap[item.agency_id],
+      count: item.documents_processed || 0,
+    }));
 
-    const totalUploads = recentUploads.reduce(
-      (sum, upload) => sum + upload.count,
-      0,
-    );
+    const totalUploads = recentUploads.reduce((sum, upload) => sum + upload.count, 0);
 
     return {
-      totalAgencies: agencies.length,
+      totalAgencies: usageData.length,
       totalUploads,
       recentUploads,
     };
-  }, [agencies, usageQueries]);
+  }, [usageData, agencies]);
 
   if (isLoading) {
     return (
