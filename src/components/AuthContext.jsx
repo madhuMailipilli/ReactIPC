@@ -19,31 +19,33 @@ export const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Check if user is already logged in
-    if (authService.isAuthenticated()) {
-      setUser(authService.getUser());
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      const userData = await authService.verifySession();
+      if (userData) {
+        setUser(userData);
+        setIsAuthenticated(true);
+      }
+      setLoading(false);
+    };
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
-    try {
-      const result = await authService.login(email, password);
-      setUser(result.user);
-      setIsAuthenticated(true);
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    const result = await authService.login(email, password);
+    const userData = await authService.verifySession();
+    setUser(userData);
+    setIsAuthenticated(!!userData);
+    return result;
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      // Ignore logout endpoint errors
+    }
     setUser(null);
     setIsAuthenticated(false);
-    
-    // Clear all cached data on logout
     queryClient.clear();
   };
 
