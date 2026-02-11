@@ -1,49 +1,36 @@
-import axios from 'axios';
-
-const baseURL = (import.meta.env.VITE_API_BASE_URL || 'https://ipc-black.vercel.app').replace(/\/$/, '');
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: baseURL,
+  baseURL: import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, ""),
   timeout: 10000,
+  withCredentials: true,
 });
 
-// Automatically attach Authorization header from localStorage token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    // Only set Content-Type for non-FormData requests
+    // Ensure that cookies are sent with every request
+    config.withCredentials = true;
+
+    // Let browser set Content-Type for FormData automatically
     if (!(config.data instanceof FormData)) {
-      config.headers['Content-Type'] = 'application/json';
+      config.headers["Content-Type"] = "application/json";
     }
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 export const apiService = {
-  // Admin Dashboard
-  dashboard: async () => {
-    const response = await api.get('/admin/dashboard');
-    return response.data;
-  },
-
-  // Agent Dashboard
-  agentDashboard: async () => {
-    const response = await api.get('/agent/dashboard');
-    return response.data;
-  },
   
+
   // Expose the axios instance for direct use if needed (e.g. by agencyService)
   get: (...args) => api.get(...args),
   post: (...args) => api.post(...args),
   put: (...args) => api.put(...args),
   delete: (...args) => api.delete(...args),
-  patch: (...args) => api.patch(...args)
+  patch: (...args) => api.patch(...args),
 };
-
+//demo/
 export default apiService;

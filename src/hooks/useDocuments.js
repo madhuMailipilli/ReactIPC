@@ -51,7 +51,7 @@ export const useSubscriptionUsage = () => {
   return useQuery({
     queryKey: ['subscriptionUsage'],
     queryFn: async () => {
-      const response = await apiService.get('/subscriptions/usage?limit=100');
+      const response = await apiService.get('/subscriptions/usage?limit=20');
       return response.data;
     },
     staleTime: 30000,
