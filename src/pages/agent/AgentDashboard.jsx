@@ -17,15 +17,33 @@ const AgentDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set static dashboard data since API endpoint doesn't exist
-    setDashboardData({
-      total_uploaded: '24',
-      total_validated: '18',
-      total_reconciled: '12',
-      total_completed: '8'
-    });
-    setLoading(false);
-  }, []);
+    const fetchDashboardData = async () => {
+      try {
+        const response = await apiService.get(`/subscriptions/usage?agencyId=${user?.id}`);
+        const data = response.data?.data || {};
+        setDashboardData({
+          total_uploaded: String(data.documents_processed || 0),
+          total_validated: '0',
+          total_reconciled: '0',
+          total_completed: '0'
+        });
+      } catch (error) {
+        setDashboardData({
+          total_uploaded: '0',
+          total_validated: '0',
+          total_reconciled: '0',
+          total_completed: '0'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user?.id) {
+      fetchDashboardData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   const today = new Date().toISOString().split('T')[0];
 
