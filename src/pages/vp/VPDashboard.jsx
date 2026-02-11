@@ -19,22 +19,31 @@ const VPDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Using mock data since VP dashboard API endpoint doesn't exist
-        const mockData = {
-          total_uploaded: '1,234',
-          total_validated: '987',
-          total_reconciled: '756',
-          total_completed: '623'
-        };
-        setDashboardData(mockData);
+        const response = await apiService.get(`/subscriptions/usage?agencyId=${user?.id}`);
+        const data = response.data?.data || {};
+        setDashboardData({
+          total_uploaded: String(data.documents_processed || 0),
+          total_validated: '0',
+          total_reconciled: '0',
+          total_completed: '0'
+        });
       } catch (error) {
-        console.error('Error fetching VP dashboard data:', error);
+        setDashboardData({
+          total_uploaded: '0',
+          total_validated: '0',
+          total_reconciled: '0',
+          total_completed: '0'
+        });
       } finally {
         setLoading(false);
       }
     };
-    fetchDashboardData();
-  }, []);
+    if (user?.id) {
+      fetchDashboardData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   const today = new Date().toISOString().split('T')[0];
 

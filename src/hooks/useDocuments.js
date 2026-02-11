@@ -21,6 +21,7 @@ export const useUploadDocuments = () => {
         queryClient.invalidateQueries({ queryKey: documentKeys.byAgency(agencyId) });
         queryClient.invalidateQueries({ queryKey: documentKeys.usage(agencyId) });
       }
+      queryClient.invalidateQueries({ queryKey: ['subscriptionUsage'] });
     },
   });
 };

@@ -67,7 +67,7 @@ const Login = () => {
     try {
       await login(formData.email, formData.password);
     } catch (err) {
-      setError(err.message || 'Invalid credentials');
+      setError(err.response?.data?.message || err.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }

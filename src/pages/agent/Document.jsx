@@ -143,7 +143,7 @@ const Document = () => {
         <img
           src={documentLogo}
           alt="Document Upload"
-          className="absolute top-1/2 right-6 -translate-y-1/2 h-40 w-40 md:h-48 md:w-48 object-contain opacity-70 drop-shadow-lg pointer-events-none"
+          className="absolute top-1/2 right-6 -translate-y-1/2 h-40 w-40 md:h-48 md:w-48 object-contain opacity-90 drop-shadow-lg pointer-events-none"
         />
       </div>
 
