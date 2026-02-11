@@ -306,7 +306,7 @@ const AdminLayout = () => {
 
               {/* Dropdown Menu */}
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden z-[100]">
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden z-[9999]">
                   <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
                     <p className="text-sm font-medium text-slate-900">{user?.username || user?.email?.split("@")[0]}</p>
                     <p className="text-xs text-slate-600 mt-1">{user?.email}</p>

@@ -685,7 +685,7 @@ const AgencyManagement = () => {
       {/* Subscription Modal */}
       {subscriptionModal.show && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 animate-zoomIn border-2 border-slate-400">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full mx-4 animate-zoomIn border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
@@ -699,7 +699,7 @@ const AgencyManagement = () => {
                 onClick={() =>
                   setSubscriptionModal({ show: false, agency: null })
                 }
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border-2 border-slate-400 text-slate-400 hover:text-slate-600 transition-all hover:scale-110 active:scale-95 shadow-sm hover:border-slate-500"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-600 transition-all hover:scale-110 active:scale-95 shadow-sm hover:border-slate-300"
               >
                 <svg
                   className="w-4 h-4"
@@ -735,7 +735,7 @@ const AgencyManagement = () => {
                   <button
                     type="button"
                     onClick={() => setPlanDropdownOpen(!planDropdownOpen)}
-                    className="w-full px-4 py-2.5 bg-white border-2 border-slate-500 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-900/5 focus:border-[#1B3C53] transition-all hover:border-slate-600 flex items-center justify-between"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1B3C53]/20 focus:border-[#1B3C53] transition-all hover:border-slate-400 flex items-center justify-between"
                   >
                     <span className={subscriptionData.planId ? "text-slate-900" : "text-slate-400"}>
                       {subscriptionData.planId 
@@ -750,7 +750,7 @@ const AgencyManagement = () => {
                   {planDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setPlanDropdownOpen(false)}></div>
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
                         {subscriptionPlans.map((plan) => (
                           <button
                             key={plan.id}
@@ -776,14 +776,14 @@ const AgencyManagement = () => {
                 onClick={() =>
                   setSubscriptionModal({ show: false, agency: null })
                 }
-                className="flex-1 px-4 py-2.5 text-xs font-medium text-slate-600 bg-white border-2 border-slate-400 rounded-xl hover:bg-slate-50 transition-all active:scale-95 hover:border-slate-500"
+                className="flex-1 px-4 py-2.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all active:scale-95 hover:border-slate-400"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubscriptionSave}
                 disabled={!subscriptionData.planId || assignSubscriptionMutation.isPending}
-                className="flex-1 px-4 py-2.5 text-xs font-medium text-white bg-[#1B3C53] rounded-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="flex-1 px-4 py-2.5 text-xs font-medium text-white bg-[#1B3C53] rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 {assignSubscriptionMutation.isPending ? "Assigning..." : "Assign Plan"}
               </button>
