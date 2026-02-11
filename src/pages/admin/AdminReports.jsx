@@ -458,7 +458,7 @@ const AdminReports = () => {
       </style>
 
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-50 bg-gradient-to-r from-white to-slate-50/30 relative z-40">
+      <div className="px-6 py-4 border-b border-slate-50 bg-gradient-to-r from-white to-slate-50/30 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="animate-fadeIn">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Reports & Analytics</h1>
