@@ -91,6 +91,7 @@ export const useUsers = (page = 1, limit = 10, search = '', paginated = false) =
     },
     enabled: isAuthenticated,
     placeholderData: (previousData) => previousData,
+    staleTime: 0,
   });
 };
 
