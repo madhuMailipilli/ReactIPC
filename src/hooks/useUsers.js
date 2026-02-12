@@ -90,6 +90,7 @@ export const useUsers = (page = 1, limit = 10, search = '', paginated = false) =
       return items;
     },
     enabled: isAuthenticated,
+    placeholderData: (previousData) => previousData,
   });
 };
 

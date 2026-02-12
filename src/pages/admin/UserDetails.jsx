@@ -7,6 +7,9 @@ const UserDetails = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnPage = searchParams.get('returnPage') || '1';
+  const search = searchParams.get('search') || '';
+  const agency = searchParams.get('agency') || '';
+  const role = searchParams.get('role') || '';
   const { data: userData, isLoading: loading, error } = useUser(id);
 
   if (loading) {
@@ -102,14 +105,26 @@ const UserDetails = () => {
 
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => navigate(`/admin/user?page=${returnPage}`)}
+                onClick={() => {
+                  const params = new URLSearchParams({ page: returnPage });
+                  if (search) params.set('search', search);
+                  if (agency) params.set('agency', agency);
+                  if (role) params.set('role', role);
+                  navigate(`/admin/user?${params.toString()}`);
+                }}
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all flex items-center text-[10px] font-medium uppercase tracking-widest backdrop-blur-md border border-white/20 shadow-lg hover:scale-105 active:scale-95"
               >
                 Back to List
               </button>
 
               <button 
-                onClick={() => navigate(`/admin/user/edit/${id}?returnPage=${returnPage}`)}
+                onClick={() => {
+                  const params = new URLSearchParams({ returnPage });
+                  if (search) params.set('search', search);
+                  if (agency) params.set('agency', agency);
+                  if (role) params.set('role', role);
+                  navigate(`/admin/user/edit/${id}?${params.toString()}`);
+                }}
                 className="px-4 py-2 bg-white text-[#1B3C53] rounded-xl font-medium text-[10px] transition-all shadow-xl flex items-center uppercase tracking-widest hover:bg-blue-50 hover:-translate-y-0.5 active:translate-y-0 hover:scale-105 active:scale-95"
               >
                 Edit User

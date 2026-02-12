@@ -7,6 +7,7 @@ const VPEditAgent = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnPage = searchParams.get('returnPage') || '1';
+  const search = searchParams.get('search') || '';
   const { data: userData, isLoading: loading, error: fetchError } = useUser(id);
   const updateUserMutation = useUpdateUser();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -199,7 +200,9 @@ const VPEditAgent = () => {
         onSuccess: (response) => {
           setShowSuccess(true);
           setTimeout(() => {
-            navigate(`/vp/agent?page=${returnPage}`);
+            const params = new URLSearchParams({ page: returnPage });
+            if (search) params.set('search', search);
+            navigate(`/vp/agent?${params.toString()}`);
           }, 2000);
         },
         onError: (error) => {

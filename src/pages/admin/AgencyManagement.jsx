@@ -14,10 +14,11 @@ const AgencyManagement = () => {
     return page ? parseInt(page, 10) : 1;
   });
   const itemsPerPage = 10;
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('search') || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get('search') || "");
   const searchQueryRef = useRef("");
   
-  const { data: allAgencies = [], isLoading, error } = useAgencies(false, 1, 1000, searchQuery, false);
+  const { data: allAgencies = [], isLoading, error } = useAgencies(false, 1, 1000, debouncedSearch, false);
   const totalPages = Math.ceil(allAgencies.length / itemsPerPage);
   const paginatedAgencies = allAgencies.slice(
     (currentPage - 1) * itemsPerPage,
@@ -47,15 +48,24 @@ const AgencyManagement = () => {
   const [deleteModal, setDeleteModal] = useState({ show: false, agency: null });
 
   useEffect(() => {
-    setSearchParams({ page: currentPage.toString() });
-  }, [currentPage, setSearchParams]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
-    if (searchQuery !== searchQueryRef.current) {
-      searchQueryRef.current = searchQuery;
+    const params = { page: currentPage.toString() };
+    if (debouncedSearch) params.search = debouncedSearch;
+    setSearchParams(params);
+  }, [currentPage, debouncedSearch, setSearchParams]);
+
+  useEffect(() => {
+    if (debouncedSearch !== searchQueryRef.current) {
+      searchQueryRef.current = debouncedSearch;
       setCurrentPage(1);
     }
-  }, [searchQuery]);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     if (!planDropdownOpen) {
@@ -477,9 +487,6 @@ const AgencyManagement = () => {
                     <h3 className="text-lg font-semibold text-slate-900 mb-2">
                       {searchQuery ? "No matching agencies found" : "No Agencies Found"}
                     </h3>
-                    {searchQuery && (
-                      <p className="text-xs text-slate-500">Try adjusting your search terms</p>
-                    )}
                   </div>
                 </td>
               </tr>
@@ -621,7 +628,9 @@ const AgencyManagement = () => {
                                   >
                                     <button
                                       onClick={() => {
-                                        navigate(`/admin/agency/view/${agencyId}?returnPage=${currentPage}`);
+                                        const params = new URLSearchParams({ returnPage: currentPage });
+                                        if (debouncedSearch) params.set('search', debouncedSearch);
+                                        navigate(`/admin/agency/view/${agencyId}?${params.toString()}`);
                                         setDropdownOpen(null);
                                       }}
                                       className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1B3C53] transition-all group/item"
@@ -651,7 +660,9 @@ const AgencyManagement = () => {
                                     </button>
                                     <button
                                       onClick={() => {
-                                        navigate(`/admin/agency/edit/${agencyId}?returnPage=${currentPage}`);
+                                        const params = new URLSearchParams({ returnPage: currentPage });
+                                        if (debouncedSearch) params.set('search', debouncedSearch);
+                                        navigate(`/admin/agency/edit/${agencyId}?${params.toString()}`);
                                         setDropdownOpen(null);
                                       }}
                                       className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1B3C53] transition-all group/item"

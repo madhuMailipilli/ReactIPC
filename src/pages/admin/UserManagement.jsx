@@ -14,14 +14,15 @@ const UserManagement = () => {
     return page ? parseInt(page, 10) : 1;
   });
   const itemsPerPage = 10;
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAgency, setSelectedAgency] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('search') || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get('search') || "");
+  const [selectedAgency, setSelectedAgency] = useState(() => searchParams.get('agency') || "");
+  const [selectedRole, setSelectedRole] = useState(() => searchParams.get('role') || "");
   const searchQueryRef = useRef("");
   const selectedAgencyRef = useRef("");
   const selectedRoleRef = useRef("");
 
-  const { data: users = [], isLoading, error } = useUsers(1, 1000, searchQuery, false);
+  const { data: users = [], isLoading, error } = useUsers(1, 1000, debouncedSearch, false);
   
   const { data: agencies = [] } = useAgencies(false);
   const deleteUserMutation = useDeleteUser();
@@ -37,17 +38,28 @@ const UserManagement = () => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    setSearchParams({ page: currentPage.toString() });
-  }, [currentPage, setSearchParams]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
-    if (searchQuery !== searchQueryRef.current || selectedAgency !== selectedAgencyRef.current || selectedRole !== selectedRoleRef.current) {
-      searchQueryRef.current = searchQuery;
+    const params = { page: currentPage.toString() };
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (selectedAgency) params.agency = selectedAgency;
+    if (selectedRole) params.role = selectedRole;
+    setSearchParams(params);
+  }, [currentPage, debouncedSearch, selectedAgency, selectedRole, setSearchParams]);
+
+  useEffect(() => {
+    if (debouncedSearch !== searchQueryRef.current || selectedAgency !== selectedAgencyRef.current || selectedRole !== selectedRoleRef.current) {
+      searchQueryRef.current = debouncedSearch;
       selectedAgencyRef.current = selectedAgency;
       selectedRoleRef.current = selectedRole;
       setCurrentPage(1);
     }
-  }, [searchQuery, selectedAgency, selectedRole]);
+  }, [debouncedSearch, selectedAgency, selectedRole]);
 
   // Keep client-side filtering for Agency and Role if API doesn't support them yet
   const filteredUsers = users.filter((user) => {
@@ -76,12 +88,20 @@ const UserManagement = () => {
   const handleViewUser = (user) => {
     const userId = user.id || user.user_id;
     setDropdownOpen(null);
-    navigate(`/admin/auth/${userId}?returnPage=${currentPage}`);
+    const params = new URLSearchParams({ returnPage: currentPage });
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (selectedAgency) params.set('agency', selectedAgency);
+    if (selectedRole) params.set('role', selectedRole);
+    navigate(`/admin/auth/${userId}?${params.toString()}`);
   };
 
   const handleEditUser = (user) => {
     const userId = user.id || user.user_id;
-    navigate(`/admin/user/edit/${userId}?returnPage=${currentPage}`);
+    const params = new URLSearchParams({ returnPage: currentPage });
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (selectedAgency) params.set('agency', selectedAgency);
+    if (selectedRole) params.set('role', selectedRole);
+    navigate(`/admin/user/edit/${userId}?${params.toString()}`);
   };
 
   const handleDeleteUser = async (user) => {
@@ -267,13 +287,10 @@ const UserManagement = () => {
               label="Agency"
               value={selectedAgency}
               onChange={(value) => setSelectedAgency(value)}
-              options={[
-                { value: "", label: "All Agencies" },
-                ...agencies.map((agency) => ({
-                  value: agency.agency_name,
-                  label: agency.agency_name,
-                })),
-              ]}
+              options={agencies.map((agency) => ({
+                value: agency.agency_name,
+                label: agency.agency_name,
+              }))}
               hideSelectOption
               enableAlphabeticSearch={true}
             />
@@ -284,7 +301,6 @@ const UserManagement = () => {
               value={selectedRole}
               onChange={(value) => setSelectedRole(value)}
               options={[
-                { value: "", label: "All Roles" },
                 { value: "VP", label: "VP" },
                 { value: "AGENT", label: "Agent" },
               ]}
@@ -357,9 +373,6 @@ const UserManagement = () => {
                     <h3 className="text-lg font-semibold text-slate-900 mb-2">
                       {searchQuery || selectedAgency || selectedRole ? "No matching users found" : "No Users Found"}
                     </h3>
-                    {(searchQuery || selectedAgency || selectedRole) && (
-                      <p className="text-xs text-slate-500">Try adjusting your search or filters</p>
-                    )}
                   </div>
                 </td>
               </tr>
