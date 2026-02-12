@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAgencies, useDeleteAgency, useUpdateAgency } from "../../hooks/useAgencies";
 import { useSubscriptionPlans, useAssignSubscription } from "../../hooks/useSubscriptions";
 import Pagination from "../../components/Pagination";
 import AgencyRowWithSubscription from "../../components/AgencyRowWithSubscription";
+import logo from "../../assets/logo.png";
 
 const AgencyManagement = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page');
+    return page ? parseInt(page, 10) : 1;
+  });
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
+  const searchQueryRef = useRef("");
   
   const { data: allAgencies = [], isLoading, error } = useAgencies(false, 1, 1000, searchQuery, false);
   const totalPages = Math.ceil(allAgencies.length / itemsPerPage);
@@ -29,7 +35,10 @@ const AgencyManagement = () => {
     planId: ''
   });
   const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
+  const [planSearchKey, setPlanSearchKey] = useState('');
+  const [highlightedPlanIndex, setHighlightedPlanIndex] = useState(-1);
   const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -38,8 +47,57 @@ const AgencyManagement = () => {
   const [deleteModal, setDeleteModal] = useState({ show: false, agency: null });
 
   useEffect(() => {
-    setCurrentPage(1);
+    setSearchParams({ page: currentPage.toString() });
+  }, [currentPage, setSearchParams]);
+
+  useEffect(() => {
+    if (searchQuery !== searchQueryRef.current) {
+      searchQueryRef.current = searchQuery;
+      setCurrentPage(1);
+    }
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (!planDropdownOpen) {
+      setPlanSearchKey('');
+      setHighlightedPlanIndex(-1);
+      return;
+    }
+
+    const filteredPlans = subscriptionPlans.filter(plan => 
+      !planSearchKey || plan.name.toLowerCase().startsWith(planSearchKey.toLowerCase())
+    );
+
+    const handleKeyPress = (e) => {
+      if (!/^[a-zA-Z]$/.test(e.key)) return;
+      e.preventDefault();
+      setPlanSearchKey(prev => prev + e.key.toLowerCase());
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        setPlanSearchKey(prev => prev.slice(0, -1));
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedPlanIndex(prev => prev < filteredPlans.length - 1 ? prev + 1 : prev);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedPlanIndex(prev => prev > 0 ? prev - 1 : prev);
+      } else if (e.key === 'Enter' && highlightedPlanIndex >= 0) {
+        e.preventDefault();
+        setSubscriptionData(prev => ({ ...prev, planId: filteredPlans[highlightedPlanIndex].id }));
+        setPlanDropdownOpen(false);
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keypress', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [planDropdownOpen, planSearchKey, highlightedPlanIndex, subscriptionPlans]);
 
   useEffect(() => {
     // Check both React Router state and window.history.state
@@ -381,13 +439,13 @@ const AgencyManagement = () => {
               <tr>
                 <td colSpan="7" className="px-6 py-16 text-center">
                   <div className="flex flex-col justify-center items-center gap-4">
-                    <div className="relative w-10 h-10">
-                      <div className="absolute inset-0 border-3 border-blue-50 rounded-full"></div>
-                      <div className="absolute inset-0 border-3 border-[#1B3C53] border-t-transparent rounded-full animate-spin"></div>
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                      <img src={logo} alt="IPC Logo" className="w-10 h-10 object-contain z-10" />
+                      <svg className="absolute inset-0 w-16 h-16 animate-spin" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="4" strokeDasharray="70 200" strokeLinecap="round" />
+                      </svg>
                     </div>
-                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest animate-pulse">
-                      Synchronizing Agencies...
-                    </span>
+                    <span className="text-sm font-medium text-slate-600">Loading...</span>
                   </div>
                 </td>
               </tr>
@@ -527,9 +585,15 @@ const AgencyManagement = () => {
                         {/* Actions Dropdown Menu */}
                         <div className="relative">
                           <button
-                            onClick={() =>
-                              setDropdownOpen(dropdownOpen === index ? null : index)
-                            }
+                            onClick={(e) => {
+                              const newIndex = dropdownOpen === index ? null : index;
+                              setDropdownOpen(newIndex);
+                              if (newIndex !== null) {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const spaceBelow = window.innerHeight - rect.bottom;
+                                setDropdownPosition({ [index]: spaceBelow < 250 });
+                              }
+                            }}
                             className={`p-1.5 rounded-lg transition-all ${
                               dropdownOpen === index
                                 ? "bg-slate-100 text-[#1B3C53]"
@@ -552,12 +616,12 @@ const AgencyManagement = () => {
                                     onClick={() => setDropdownOpen(null)}
                                   ></div>
                                   <div
-                                    className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-30 border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[160px] lg:min-w-[180px]"
+                                    className={`absolute right-0 ${dropdownPosition[index] ? 'bottom-full mb-2' : 'top-full mt-2'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-30 border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[160px] lg:min-w-[180px]`}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <button
                                       onClick={() => {
-                                        navigate(`/admin/agency/view/${agencyId}`);
+                                        navigate(`/admin/agency/view/${agencyId}?returnPage=${currentPage}`);
                                         setDropdownOpen(null);
                                       }}
                                       className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1B3C53] transition-all group/item"
@@ -587,7 +651,7 @@ const AgencyManagement = () => {
                                     </button>
                                     <button
                                       onClick={() => {
-                                        navigate(`/admin/agency/edit/${agencyId}`);
+                                        navigate(`/admin/agency/edit/${agencyId}?returnPage=${currentPage}`);
                                         setDropdownOpen(null);
                                       }}
                                       className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1B3C53] transition-all group/item"
@@ -738,32 +802,73 @@ const AgencyManagement = () => {
                     className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1B3C53]/20 focus:border-[#1B3C53] transition-all hover:border-slate-400 flex items-center justify-between"
                   >
                     <span className={subscriptionData.planId ? "text-slate-900" : "text-slate-400"}>
-                      {subscriptionData.planId 
-                        ? subscriptionPlans.find(p => p.id === subscriptionData.planId)?.name + " - " + subscriptionPlans.find(p => p.id === subscriptionData.planId)?.document_limit + " docs"
-                        : "Select a plan"
-                      }
+                      {planSearchKey && planDropdownOpen ? (
+                        <span className="text-[#1B3C53] font-bold">{planSearchKey}</span>
+                      ) : subscriptionData.planId ? (
+                        subscriptionPlans.find(p => p.id === subscriptionData.planId)?.name + " - " + subscriptionPlans.find(p => p.id === subscriptionData.planId)?.document_limit + " docs"
+                      ) : (
+                        "Select a plan"
+                      )}
                     </span>
-                    <svg className={`w-4 h-4 text-slate-400 transition-transform ${planDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <div className="flex items-center gap-1">
+                      {(subscriptionData.planId || planSearchKey) && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSubscriptionData(prev => ({ ...prev, planId: '' }));
+                            setPlanSearchKey('');
+                          }}
+                          className="p-0.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                      <svg className={`w-4 h-4 text-slate-400 transition-transform ${planDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </button>
                   {planDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setPlanDropdownOpen(false)}></div>
                       <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
-                        {subscriptionPlans.map((plan) => (
-                          <button
-                            key={plan.id}
-                            type="button"
-                            onClick={() => {
-                              setSubscriptionData(prev => ({ ...prev, planId: plan.id }));
-                              setPlanDropdownOpen(false);
-                            }}
-                            className="w-full px-4 py-2.5 text-left text-[13px] font-medium text-slate-900 hover:bg-slate-50 transition-colors first:rounded-t-xl last:rounded-b-xl border-b border-slate-100 last:border-b-0"
-                          >
-                            {plan.name} - {plan.document_limit} docs
-                          </button>
-                        ))}
+                        {subscriptionPlans
+                          .filter(plan => !planSearchKey || plan.name.toLowerCase().startsWith(planSearchKey.toLowerCase()))
+                          .map((plan, idx) => {
+                            const matchLength = planSearchKey.length;
+                            const planName = plan.name;
+                            const highlightedPart = planName.substring(0, matchLength);
+                            const remainingPart = planName.substring(matchLength);
+                            const isHighlighted = idx === highlightedPlanIndex;
+                            
+                            return (
+                              <button
+                                key={plan.id}
+                                type="button"
+                                onClick={() => {
+                                  setSubscriptionData(prev => ({ ...prev, planId: plan.id }));
+                                  setPlanDropdownOpen(false);
+                                }}
+                                onMouseEnter={() => setHighlightedPlanIndex(idx)}
+                                className={`w-full px-4 py-2.5 text-left text-[13px] font-medium transition-colors first:rounded-t-xl last:rounded-b-xl border-b border-slate-100 last:border-b-0 ${
+                                  isHighlighted ? 'bg-[#1B3C53]/10 text-[#1B3C53]' : 'text-slate-900 hover:bg-slate-50'
+                                }`}
+                              >
+                                {planSearchKey ? (
+                                  <>
+                                    <span className="font-extrabold text-[#1B3C53]">{highlightedPart}</span>
+                                    <span>{remainingPart}</span>
+                                    <span> - {plan.document_limit} docs</span>
+                                  </>
+                                ) : (
+                                  <>{plan.name} - {plan.document_limit} docs</>
+                                )}
+                              </button>
+                            );
+                          })}
                       </div>
                     </>
                   )}

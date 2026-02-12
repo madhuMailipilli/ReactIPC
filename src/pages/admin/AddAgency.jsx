@@ -377,6 +377,7 @@ const AddAgency = () => {
                   { value: "Australia", label: "Australia" },
                 ]}
                 hideSelectOption
+                enableAlphabeticSearch={true}
               />
               <Input 
                 label="Phone Number" 

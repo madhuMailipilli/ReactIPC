@@ -654,6 +654,7 @@ const AddUser = () => {
                     label: agency.agency_name,
                   }))}
                   hideSelectOption
+                  enableAlphabeticSearch={true}
                 />
               </div>
             </div>
@@ -723,6 +724,7 @@ const SelectWrapper = ({
   required = false,
   options = [],
   hideSelectOption = false,
+  enableAlphabeticSearch = false,
 }) => (
   <CustomSelect
     label={label}
@@ -732,6 +734,7 @@ const SelectWrapper = ({
     error={error}
     required={required}
     hideSelectOption={hideSelectOption}
+    enableAlphabeticSearch={enableAlphabeticSearch}
   />
 );
 

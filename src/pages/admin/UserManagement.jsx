@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useUsers, useDeleteUser, useResetPassword } from "../../hooks/useUsers";
 import { useAgencies } from "../../hooks/useAgencies";
 import CustomSelect from "../../components/CustomSelect";
 import Pagination from "../../components/Pagination";
+import logo from "../../assets/logo.png";
 
 const UserManagement = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page');
+    return page ? parseInt(page, 10) : 1;
+  });
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgency, setSelectedAgency] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+  const searchQueryRef = useRef("");
+  const selectedAgencyRef = useRef("");
+  const selectedRoleRef = useRef("");
 
   const { data: users = [], isLoading, error } = useUsers(1, 1000, searchQuery, false);
   
@@ -20,6 +28,7 @@ const UserManagement = () => {
   const resetPasswordMutation = useResetPassword();
   
   const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({});
   const [isDeleting, setIsDeleting] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ show: false, user: null });
   const [resetPasswordModal, setResetPasswordModal] = useState({ show: false, user: null });
@@ -28,7 +37,16 @@ const UserManagement = () => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    setCurrentPage(1);
+    setSearchParams({ page: currentPage.toString() });
+  }, [currentPage, setSearchParams]);
+
+  useEffect(() => {
+    if (searchQuery !== searchQueryRef.current || selectedAgency !== selectedAgencyRef.current || selectedRole !== selectedRoleRef.current) {
+      searchQueryRef.current = searchQuery;
+      selectedAgencyRef.current = selectedAgency;
+      selectedRoleRef.current = selectedRole;
+      setCurrentPage(1);
+    }
   }, [searchQuery, selectedAgency, selectedRole]);
 
   // Keep client-side filtering for Agency and Role if API doesn't support them yet
@@ -58,12 +76,12 @@ const UserManagement = () => {
   const handleViewUser = (user) => {
     const userId = user.id || user.user_id;
     setDropdownOpen(null);
-    navigate(`/admin/auth/${userId}`);
+    navigate(`/admin/auth/${userId}?returnPage=${currentPage}`);
   };
 
   const handleEditUser = (user) => {
     const userId = user.id || user.user_id;
-    navigate(`/admin/user/edit/${userId}`);
+    navigate(`/admin/user/edit/${userId}?returnPage=${currentPage}`);
   };
 
   const handleDeleteUser = async (user) => {
@@ -257,6 +275,7 @@ const UserManagement = () => {
                 })),
               ]}
               hideSelectOption
+              enableAlphabeticSearch={true}
             />
           </div>
           <div className="w-full sm:w-48 lg:w-48 relative z-10">
@@ -306,13 +325,13 @@ const UserManagement = () => {
               <tr>
                 <td colSpan="6" className="px-6 py-16 text-center">
                   <div className="flex flex-col justify-center items-center gap-4">
-                    <div className="relative w-10 h-10">
-                      <div className="absolute inset-0 border-3 border-blue-50 rounded-full"></div>
-                      <div className="absolute inset-0 border-3 border-[#1B3C53] border-t-transparent rounded-full animate-spin"></div>
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                      <img src={logo} alt="IPC Logo" className="w-10 h-10 object-contain z-10" />
+                      <svg className="absolute inset-0 w-16 h-16 animate-spin" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="4" strokeDasharray="70 200" strokeLinecap="round" />
+                      </svg>
                     </div>
-                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest animate-pulse">
-                      Synchronizing Users...
-                    </span>
+                    <span className="text-sm font-medium text-slate-600">Loading...</span>
                   </div>
                 </td>
               </tr>
@@ -411,9 +430,15 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-3.5 whitespace-nowrap text-center relative">
                       <button
-                        onClick={() =>
-                          setDropdownOpen(dropdownOpen === i ? null : i)
-                        }
+                        onClick={(e) => {
+                          const newIndex = dropdownOpen === i ? null : i;
+                          setDropdownOpen(newIndex);
+                          if (newIndex !== null) {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const spaceBelow = window.innerHeight - rect.bottom;
+                            setDropdownPosition({ [i]: spaceBelow < 280 });
+                          }
+                        }}
                         className={`p-1.5 rounded-lg transition-all ${dropdownOpen === i ? "bg-slate-100 text-[#1B3C53]" : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"}`}
                       >
                         <svg
@@ -431,7 +456,7 @@ const UserManagement = () => {
                             className="fixed inset-0 z-20"
                             onClick={() => setDropdownOpen(null)}
                           ></div>
-                          <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-30 border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[180px]" onClick={(e) => e.stopPropagation()}>
+                          <div className={`absolute right-0 ${dropdownPosition[i] ? 'bottom-full mb-2' : 'top-full mt-2'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-30 border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[180px]`} onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => handleViewUser(user)}
                               className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1B3C53] transition-all group/item"
