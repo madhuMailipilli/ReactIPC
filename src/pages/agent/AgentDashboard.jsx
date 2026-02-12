@@ -194,6 +194,7 @@ const AgentDashboard = () => {
               value={selectedLob}
               onChange={setSelectedLob}
               options={lobOptions}
+              enableAlphabeticSearch={true}
             />
           </div>
 

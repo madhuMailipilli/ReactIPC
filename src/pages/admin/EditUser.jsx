@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useUser, useUpdateUser } from "../../hooks/useUsers";
 
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnPage = searchParams.get('returnPage') || '1';
   const { data: userData, isLoading: loading, error: fetchError } = useUser(id);
   const updateUserMutation = useUpdateUser();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -179,7 +181,7 @@ const EditUser = () => {
         onSuccess: (response) => {
           setShowSuccess(true);
           setTimeout(() => {
-            navigate('/admin/user');
+            navigate(`/admin/user?page=${returnPage}`);
           }, 2000);
         },
         onError: (error) => {

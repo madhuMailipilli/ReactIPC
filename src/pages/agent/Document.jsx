@@ -218,6 +218,7 @@ const Document = () => {
                   { value: "Dwelling Fire", label: "Dwelling Fire" },
                 ]}
                 hideSelectOption
+                enableAlphabeticSearch={true}
               />
             </div>
           </div>

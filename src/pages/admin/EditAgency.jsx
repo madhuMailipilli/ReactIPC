@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAgency, useUpdateAgency } from "../../hooks/useAgencies";
 import CustomSelect from "../../components/CustomSelect";
 
 const EditAgency = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const returnPage = searchParams.get('returnPage') || '1';
   const { data: agencyData, isLoading: loading, error: fetchError } = useAgency(id, true);
   const updateAgencyMutation = useUpdateAgency();
   const [showError, setShowError] = useState(false);
@@ -138,7 +140,7 @@ const EditAgency = () => {
         { id, data: cleanedPayload },
         {
           onSuccess: () => {
-            navigate("/admin/agency", {
+            navigate(`/admin/agency?page=${returnPage}`, {
               replace: true,
               state: { successMessage: "Agency updated successfully" },
             });
@@ -271,7 +273,7 @@ const EditAgency = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
               <button
-                onClick={() => navigate("/admin/agency")}
+                onClick={() => navigate(`/admin/agency?page=${returnPage}`)}
                 className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-all active:scale-90 group"
               >
                 <svg
