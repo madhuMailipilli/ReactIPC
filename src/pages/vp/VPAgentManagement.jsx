@@ -12,9 +12,10 @@ const VPAgentManagement = () => {
     return page ? parseInt(page, 10) : 1;
   });
   const itemsPerPage = 10;
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('search') || "");
   const searchQueryRef = useRef("");
-  const { data: users = [], isLoading: loading, error } = useUsers(1, 1000, searchQuery, false);
+  const { data: users = [], isLoading: loading, error } = useUsers(1, 1000, debouncedSearch, false);
   const deleteUserMutation = useDeleteUser();
   const resetPasswordMutation = useResetPassword();
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -25,25 +26,28 @@ const VPAgentManagement = () => {
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
 
   useEffect(() => {
-    setSearchParams({ page: currentPage.toString() });
-  }, [currentPage, setSearchParams]);
+    const params = new URLSearchParams();
+    params.set('page', currentPage.toString());
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    setSearchParams(params);
+  }, [currentPage, debouncedSearch, setSearchParams]);
 
   useEffect(() => {
-    if (searchQuery !== searchQueryRef.current) {
-      searchQueryRef.current = searchQuery;
-      setCurrentPage(1);
-    }
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const filteredUsers = users.filter((user) =>
-    searchQuery
-      ? user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-      : true,
-  );
+  useEffect(() => {
+    if (debouncedSearch !== searchQueryRef.current) {
+      searchQueryRef.current = debouncedSearch;
+      setCurrentPage(1);
+    }
+  }, [debouncedSearch]);
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice(
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const paginatedUsers = users.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -51,13 +55,17 @@ const VPAgentManagement = () => {
   const handleViewUser = (user) => {
     const userId = user.id || user.user_id;
     setDropdownOpen(null);
-    navigate(`/vp/agent/view/id/${userId}?returnPage=${currentPage}`);
+    const params = new URLSearchParams({ returnPage: currentPage.toString() });
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    navigate(`/vp/agent/view/id/${userId}?${params.toString()}`);
   };
 
   const handleEditUser = (user) => {
     const userId = user.id || user.user_id;
     setDropdownOpen(null);
-    navigate(`/vp/agent/edit/${userId}?returnPage=${currentPage}`);
+    const params = new URLSearchParams({ returnPage: currentPage.toString() });
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    navigate(`/vp/agent/edit/${userId}?${params.toString()}`);
   };
 
   const handleDeleteUser = (user) => {
@@ -236,7 +244,7 @@ const VPAgentManagement = () => {
                   </div>
                 </td>
               </tr>
-            ) : filteredUsers.length === 0 ? (
+            ) : users.length === 0 ? (
               <tr>
                 <td colSpan="5" className="px-8 py-32 text-center">
                   <div className="max-w-xs mx-auto flex flex-col items-center">
@@ -256,11 +264,8 @@ const VPAgentManagement = () => {
                       </svg>
                     </div>
                     <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                      {searchQuery ? "No matching agents found" : "No Agents Found"}
+                      {debouncedSearch ? "No matching agents found" : "No Agents Found"}
                     </h3>
-                    {searchQuery && (
-                      <p className="text-xs text-slate-500">Try adjusting your search query</p>
-                    )}
                   </div>
                 </td>
               </tr>

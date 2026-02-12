@@ -7,6 +7,7 @@ const VPAgentDetails = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnPage = searchParams.get('returnPage') || '1';
+  const search = searchParams.get('search') || '';
   const { data: userData, isLoading: loading, error } = useUser(id);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -167,14 +168,22 @@ const VPAgentDetails = () => {
 
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => navigate(`/vp/agent?page=${returnPage}`)}
+                onClick={() => {
+                  const params = new URLSearchParams({ page: returnPage });
+                  if (search) params.set('search', search);
+                  navigate(`/vp/agent?${params.toString()}`);
+                }}
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all flex items-center text-[10px] font-medium uppercase tracking-widest backdrop-blur-md border border-white/20 shadow-lg hover:scale-105 active:scale-95"
               >
                 Back to List
               </button>
 
               <button 
-                onClick={() => navigate(`/vp/agent/edit/${id}?returnPage=${returnPage}`)}
+                onClick={() => {
+                  const params = new URLSearchParams({ returnPage });
+                  if (search) params.set('search', search);
+                  navigate(`/vp/agent/edit/${id}?${params.toString()}`);
+                }}
                 className="px-4 py-2 bg-white text-[#1B3C53] rounded-xl font-medium text-[10px] transition-all shadow-xl flex items-center uppercase tracking-widest hover:bg-blue-50 hover:-translate-y-0.5 active:translate-y-0 hover:scale-105 active:scale-95"
               >
                 Edit Agent
