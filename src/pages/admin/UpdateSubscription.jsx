@@ -115,13 +115,10 @@ const UpdateSubscription = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !agencyData) {
     return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">Syncing Subscription...</span>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-10 h-10 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
       </div>
     );
   }

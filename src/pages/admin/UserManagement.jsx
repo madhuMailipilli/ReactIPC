@@ -23,6 +23,7 @@ const UserManagement = () => {
   const selectedRoleRef = useRef("");
 
   const { data: users = [], isLoading, error } = useUsers(1, 1000, debouncedSearch, false);
+  const usersArray = Array.isArray(users) ? users : (users?.items || []);
   
   const { data: agencies = [] } = useAgencies(false);
   const deleteUserMutation = useDeleteUser();
@@ -62,7 +63,7 @@ const UserManagement = () => {
   }, [debouncedSearch, selectedAgency, selectedRole]);
 
   // Keep client-side filtering for Agency and Role if API doesn't support them yet
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = usersArray.filter((user) => {
     // Exclude SUPER_ADMIN users
     const isSuperAdmin =
       user.roles && user.roles.some((role) => role.code === "SUPER_ADMIN");
