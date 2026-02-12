@@ -111,6 +111,7 @@ export const useAgencies = (includeInactive = false, page = 1, limit = 10, searc
     },
     enabled: isAuthenticated,
     placeholderData: (previousData) => previousData,
+    staleTime: 0,
   });
 };
 
