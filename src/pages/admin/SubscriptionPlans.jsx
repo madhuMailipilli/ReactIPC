@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscriptionPlans, useDeletePlan } from '../../hooks/useSubscriptions';
+import logo from '../../assets/logo.png';
 
 const SubscriptionPlans = () => {
   const navigate = useNavigate();
@@ -82,8 +83,13 @@ const SubscriptionPlans = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px] bg-slate-50">
-        <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-        <p className="mt-4 text-slate-400 text-sm font-medium tracking-widest uppercase animate-pulse">Loading Plans...</p>
+        <div className="relative w-16 h-16 flex items-center justify-center">
+          <img src={logo} alt="IPC Logo" className="w-10 h-10 object-contain z-10" />
+          <svg className="absolute inset-0 w-16 h-16 animate-spin" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="4" strokeDasharray="70 200" strokeLinecap="round" />
+          </svg>
+        </div>
+        <span className="mt-4 text-sm font-medium text-slate-600">Loading...</span>
       </div>
     );
   }
