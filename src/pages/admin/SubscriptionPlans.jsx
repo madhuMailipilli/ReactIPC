@@ -117,7 +117,7 @@ const SubscriptionPlans = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-slate-200">
+    <div className="bg-slate-50 text-slate-900 selection:bg-slate-200">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: `radial-gradient(circle at 2px 2px, #000 1px, transparent 0)`, backgroundSize: '24px 24px' }}></div>
         
