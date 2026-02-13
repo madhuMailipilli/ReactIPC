@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "./components/AuthContext";
+import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleBasedRedirect from "./components/RoleBasedRedirect";
 import AdminLayout from "./components/AdminLayout";
@@ -48,6 +49,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
@@ -56,13 +58,16 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/auth/:id" element={<UserDetails />} />
-          
+
           {/* Protected Admin Layout Route */}
-          <Route path="/admin" element={
-            <ProtectedRoute requiredRole="SUPER_ADMIN">
-              <AdminLayout />
-            </ProtectedRoute>
-          }>
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="SUPER_ADMIN">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="agency" element={<AgencyManagement />} />
@@ -74,7 +79,10 @@ function App() {
             <Route path="user/view/id/:id" element={<UserDetails />} />
             <Route path="auth/:id" element={<UserDetails />} />
             <Route path="user/edit/:id" element={<EditUser />} />
-            <Route path="user/reset-password/:username" element={<ResetPassword />} />
+            <Route
+              path="user/reset-password/:username"
+              element={<ResetPassword />}
+            />
             <Route path="user/add" element={<AddUser />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="subscription/create-plan" element={<PlanForm />} />
@@ -85,11 +93,14 @@ function App() {
           </Route>
 
           {/* Protected Agent Layout Route */}
-          <Route path="/agent" element={
-            <ProtectedRoute requiredRole="AGENT">
-              <AgentLayout />
-            </ProtectedRoute>
-          }>
+          <Route
+            path="/agent"
+            element={
+              <ProtectedRoute requiredRole="AGENT">
+                <AgentLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<AgentDashboard />} />
             <Route path="document" element={<Document />} />
             <Route path="profile" element={<Profile />} />
@@ -97,16 +108,22 @@ function App() {
           </Route>
 
           {/* Protected VP Layout Route */}
-          <Route path="/vp" element={
-            <ProtectedRoute requiredRole="VP">
-              <VPLayout />
-            </ProtectedRoute>
-          }>
+          <Route
+            path="/vp"
+            element={
+              <ProtectedRoute requiredRole="VP">
+                <VPLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<VPDashboard />} />
             <Route path="agent" element={<VPAgentManagement />} />
             <Route path="agent/view/id/:id" element={<VPAgentDetails />} />
             <Route path="agent/edit/:id" element={<VPEditAgent />} />
-            <Route path="agent/reset-password/:username" element={<ResetPassword />} />
+            <Route
+              path="agent/reset-password/:username"
+              element={<ResetPassword />}
+            />
             <Route path="agent/add" element={<VPAddAgent />} />
             <Route path="profile" element={<Profile />} />
             <Route path="change-password" element={<ChangePassword />} />

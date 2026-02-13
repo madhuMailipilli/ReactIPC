@@ -160,7 +160,7 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(27,60,83,0.05)] border border-slate-100 relative animate-in fade-in duration-500">
+    <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(27,60,83,0.05)] border border-slate-100 relative animate-in fade-in duration-500 overflow-hidden">
       <style>
         {`
           @keyframes fadeIn {
