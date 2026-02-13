@@ -91,18 +91,36 @@ export const useUsers = (page = 1, limit = 10, search = '', paginated = false) =
     },
     enabled: isAuthenticated,
     placeholderData: (previousData) => previousData,
-    staleTime: 0,
   });
 };
 
 export const useUser = (id) => {
   const { user, isAuthenticated } = useAuth();
   const userRole = user?.role_id || user?.role;
+  const queryClient = useQueryClient();
   
   return useQuery({
     queryKey: userKeys.detail(id, userRole),
     queryFn: () => apiService.get(`/auth/${id}`).then(res => res.data.data),
     enabled: !!id && isAuthenticated,
+    initialData: () => {
+      if (!id) return undefined;
+      const cachedLists = queryClient.getQueriesData({ queryKey: userKeys.lists(userRole) });
+      const normalizedId = String(id);
+
+      for (const [, data] of cachedLists) {
+        if (!data) continue;
+        const items = Array.isArray(data) ? data : data.items;
+        if (!Array.isArray(items)) continue;
+        const match = items.find((user) => {
+          const userId = user?.id ?? user?.user_id;
+          return userId !== undefined && String(userId) === normalizedId;
+        });
+        if (match) return match;
+      }
+
+      return undefined;
+    },
   });
 };
 

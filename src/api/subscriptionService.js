@@ -10,8 +10,8 @@ export const subscriptionService = {
 
   // Subscription Management
   assignSubscription: (subscriptionData) => apiService.post('/subscriptions/assign', subscriptionData),
-  getActiveSubscription: (agencyId) => apiService.get(`/subscriptions/active/${agencyId}`),
-  getSubscriptionHistory: (agencyId, params = {}) => apiService.get(`/subscriptions/history/${agencyId}`, { params }),
+  getActiveSubscription: (agencyId) => apiService.get(`/agencies/${agencyId}/subscriptions/current`),
+  getSubscriptionHistory: (agencyId, params = {}) => apiService.get(`/agencies/${agencyId}/subscriptions/history`, { params }),
   getUsage: (agencyId) => apiService.get(`/subscriptions/usage/${agencyId}`),
 };
 

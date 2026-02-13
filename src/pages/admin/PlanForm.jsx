@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCreatePlan, useUpdatePlan, useSubscriptionPlan } from '../../hooks/useSubscriptions';
+import logo from '../../assets/logo.png';
 
 const PlanForm = () => {
   const navigate = useNavigate();
@@ -93,7 +94,15 @@ const PlanForm = () => {
   if (isEdit && loadingPlan && !planData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative w-16 h-16">
+            <img src={logo} alt="IPC Logo" className="w-10 h-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            <svg className="w-16 h-16 animate-spin" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="8" strokeDasharray="220" strokeDashoffset="60" strokeLinecap="round" />
+            </svg>
+          </div>
+          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.2em] animate-pulse">Loading...</span>
+        </div>
       </div>
     );
   }

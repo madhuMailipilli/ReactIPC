@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useUser, useUpdateUser } from "../../hooks/useUsers";
+import logo from "../../assets/logo.png";
 
 const VPEditAgent = () => {
   const { id } = useParams();
@@ -218,12 +219,14 @@ const VPEditAgent = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 border-4 border-blue-50 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-[#1B3C53] border-t-transparent rounded-full animate-spin"></div>
+        <div className="relative w-16 h-16">
+          <img src={logo} alt="IPC Logo" className="w-10 h-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          <svg className="w-16 h-16 animate-spin" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="8" strokeDasharray="220" strokeDashoffset="60" strokeLinecap="round" />
+          </svg>
         </div>
-        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest animate-pulse">
-          Loading Agent Profile...
+        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.2em] animate-pulse">
+          Loading...
         </span>
       </div>
     );

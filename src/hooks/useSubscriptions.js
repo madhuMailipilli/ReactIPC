@@ -23,13 +23,13 @@ export const useSubscriptionPlans = () => {
       const response = await apiService.get('/subscriptions/plans');
       return response.data;
     },
-    retry: false,
-    refetchOnWindowFocus: false
   });
 };
 
 // Get single subscription plan
 export const useSubscriptionPlan = (planId) => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: subscriptionKeys.plan(planId),
     queryFn: async () => {
@@ -37,8 +37,20 @@ export const useSubscriptionPlan = (planId) => {
       return response.data;
     },
     enabled: !!planId,
-    retry: false,
-    refetchOnWindowFocus: false
+    initialData: () => {
+      if (!planId) return undefined;
+      const cachedPlans = queryClient.getQueryData(subscriptionKeys.plans());
+      if (!cachedPlans) return undefined;
+      
+      const plans = cachedPlans?.data || cachedPlans;
+      if (!Array.isArray(plans)) return undefined;
+      
+      const normalizedId = String(planId);
+      return plans.find((plan) => {
+        const id = plan?.id ?? plan?.plan_id ?? plan?.subscription_plan_id;
+        return id !== undefined && String(id) === normalizedId;
+      });
+    },
   });
 };
 
@@ -139,9 +151,6 @@ export const useCurrentSubscription = (agencyId) => {
       return response.data;
     },
     enabled: !!agencyId,
-    retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: 'always'
   });
 };
 
@@ -154,9 +163,6 @@ export const useSubscriptionHistory = (agencyId) => {
       return response.data;
     },
     enabled: !!agencyId,
-    retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: 'always'
   });
 };
 
@@ -169,9 +175,6 @@ export const useUsage = (agencyId) => {
       return response.data;
     },
     enabled: !!agencyId,
-    retry: false,
-    refetchOnWindowFocus: false,
-    onError: () => {} // Suppress errors for optional data
   });
 };
 

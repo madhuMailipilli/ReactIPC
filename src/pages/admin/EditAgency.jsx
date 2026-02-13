@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAgency, useUpdateAgency } from "../../hooks/useAgencies";
 import CustomSelect from "../../components/CustomSelect";
+import logo from "../../assets/logo.png";
 
 const EditAgency = () => {
   const navigate = useNavigate();
@@ -45,22 +46,23 @@ const EditAgency = () => {
 
   useEffect(() => {
     if (agencyData) {
+      const data = agencyData.data || agencyData.agency || agencyData;
       setFormData({
-        agencyName: agencyData.agency_name || "",
-        branchCode: agencyData.branch_code || "",
-        email: agencyData.email_address || "",
-        country: agencyData.country || "",
-        phone: agencyData.phone_number || "",
-        alternatePhone: agencyData.alternate_phone || "",
-        address1: agencyData.address_line_1 || "",
-        address2: agencyData.address_line_2 || "",
-        pincode: agencyData.postal_code || "",
-        state: agencyData.state || "",
-        city: agencyData.city || "",
-        documentLimit: agencyData.document_limit || "",
-        startDate: agencyData.start_date ? agencyData.start_date.split("T")[0] : "",
-        endDate: agencyData.end_date ? agencyData.end_date.split("T")[0] : "",
-        term: agencyData.term || "",
+        agencyName: data.agency_name || "",
+        branchCode: data.branch_code || "",
+        email: data.email_address || data.email || "",
+        country: data.country || "",
+        phone: data.phone_number || data.phone || "",
+        alternatePhone: data.alternate_phone || "",
+        address1: data.address_line_1 || data.address1 || "",
+        address2: data.address_line_2 || data.address2 || "",
+        pincode: data.postal_code || data.pincode || "",
+        state: data.state || "",
+        city: data.city || "",
+        documentLimit: data.document_limit || "",
+        startDate: data.start_date ? data.start_date.split("T")[0] : "",
+        endDate: data.end_date ? data.end_date.split("T")[0] : "",
+        term: data.term || "",
       });
     }
   }, [agencyData]);
@@ -109,11 +111,12 @@ const EditAgency = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
+      const data = agencyData.data || agencyData.agency || agencyData;
       const payload = {
-        ...agencyData,
-        address_id: agencyData?.address_id || agencyData?.address?.id,
-        contact_id: agencyData?.contact_id || agencyData?.contact?.id,
-        location_id: agencyData?.location_id || agencyData?.location?.id,
+        ...data,
+        address_id: data?.address_id || data?.address?.id,
+        contact_id: data?.contact_id || data?.contact?.id,
+        location_id: data?.location_id || data?.location?.id,
 
         agency_name: formData.agencyName,
         branch_code: formData.branchCode,
@@ -159,13 +162,14 @@ const EditAgency = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-[#1B3C53]/10 border-t-[#1B3C53] rounded-full animate-spin"></div>
-          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.2em]">
-            Loading Architecture...
-          </span>
+      <div className="flex flex-col justify-center items-center min-h-[400px]">
+        <div className="relative w-16 h-16 flex items-center justify-center">
+          <img src={logo} alt="IPC Logo" className="w-10 h-10 object-contain z-10" />
+          <svg className="absolute inset-0 w-16 h-16 animate-spin" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="4" strokeDasharray="70 200" strokeLinecap="round" />
+          </svg>
         </div>
+        <span className="mt-4 text-sm font-medium text-slate-600">Loading...</span>
       </div>
     );
   }

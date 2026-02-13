@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { useAgency } from "../../hooks/useAgencies";
 import { useCurrentSubscription, useSubscriptionHistory, useSubscriptionPlans } from "../../hooks/useSubscriptions";
+import logo from "../../assets/logo.png";
 
 const AgencyDetails = () => {
   const navigate = useNavigate();
@@ -25,27 +26,29 @@ const AgencyDetails = () => {
   const isDataLoading = agencyLoading || subLoading || historyLoading || plansLoading;
   const hasData = agencyData && (currentSubscription !== undefined);
 
+  useEffect(() => {
+    if (!isDataLoading && (error || !agencyData)) {
+      navigate('/admin/agency');
+    }
+  }, [error, agencyData, isDataLoading, navigate]);
+
   if (isDataLoading && !hasData) {
     return (
       <div className="flex items-center justify-center min-h-[500px]">
         <div className="flex flex-col items-center gap-6">
           <div className="relative w-16 h-16">
-            <div className="absolute inset-0 border-4 border-blue-50 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-[#1B3C53] border-t-transparent rounded-full animate-spin"></div>
+            <img src={logo} alt="IPC Logo" className="w-10 h-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            <svg className="w-16 h-16 animate-spin" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="8" strokeDasharray="220" strokeDashoffset="60" strokeLinecap="round" />
+            </svg>
           </div>
-          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.2em] animate-pulse">Synchronizing Details...</span>
+          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.2em] animate-pulse">Loading...</span>
         </div>
       </div>
     );
   }
 
-  if (error) {
-    navigate('/admin/agency');
-    return null;
-  }
-
-  if (!agencyData) {
-    navigate('/admin/agency');
+  if (error || !agencyData) {
     return null;
   }
 
@@ -244,18 +247,18 @@ const AgencyDetails = () => {
                     <div key={index} className="p-4 hover:bg-slate-50 transition-colors">
                       <div className="flex justify-between items-start mb-1">
                         <p className="text-sm font-bold text-[#1B3C53]">
-                          {subscriptionPlans.find(p => p.id === sub.subscription_plan_id)?.name || `Plan ${sub.subscription_plan_id}`}
+                          {sub.plan_name || 'Unknown Plan'}
                         </p>
                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border ${
                           sub.is_active 
                             ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                             : 'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>
-                          {sub.is_active ? 'Active' : 'Expired'}
+                          {sub.status || (sub.is_active ? 'Active' : 'Expired')}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-500 font-medium">
-                        Assigned: {new Date(sub.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                        {sub.start_date && `${new Date(sub.start_date).toLocaleDateString(undefined, { dateStyle: 'medium' })} - ${new Date(sub.end_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}`}
                       </p>
                     </div>
                   ))
