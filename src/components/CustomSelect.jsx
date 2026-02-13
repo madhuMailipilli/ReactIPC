@@ -91,7 +91,7 @@ const CustomSelect = ({
     <div className="space-y-1.5 group">
       <label className="text-sm font-medium text-slate-700 ml-1">
         {label}
-        {required && <span className="text-[#1B3C53] ml-1">*</span>}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <div className="relative">
         <div

@@ -111,7 +111,6 @@ export const useAgencies = (includeInactive = false, page = 1, limit = 10, searc
     },
     enabled: isAuthenticated,
     placeholderData: (previousData) => previousData,
-    staleTime: 0,
   });
 };
 
@@ -124,14 +123,8 @@ export const useAgency = (id, includeInactive = false) => {
     queryKey: agencyKeys.detail(id, userRole),
     queryFn: async () => {
       const response = await apiService.get(`/agencies/agency/${id}`, { params: { includeInactive } });
-      // Handle different response structures
-      if (response.data?.data) {
-        return response.data.data;
-      }
-      if (response.data?.agency) {
-        return response.data.agency;
-      }
-      return response.data;
+      // Response structure: { status: "success", message: "Success", data: { agency_id: "...", agency_name: "...", ... } }
+      return response.data?.data || response.data?.agency || response.data;
     },
     enabled: !!id && isAuthenticated,
     initialData: () => {
@@ -152,7 +145,6 @@ export const useAgency = (id, includeInactive = false) => {
 
       return undefined;
     },
-    refetchOnMount: 'always',
   });
 };
 

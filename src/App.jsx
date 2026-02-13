@@ -26,8 +26,6 @@ import AdminReports from "./pages/admin/AdminReports";
 import Profile from "./pages/admin/Profile";
 import ChangePassword from "./pages/admin/ChangePassword";
 
-import UpdateSubscription from "./pages/admin/UpdateSubscription";
-import UpdateDocLimit from "./pages/admin/UpdateDocLimit";
 import EditAgency from "./pages/admin/EditAgency";
 import AgencyDetails from "./pages/admin/AgencyDetails";
 import SubscriptionPlans from "./pages/admin/SubscriptionPlans";
@@ -71,8 +69,7 @@ function App() {
             <Route path="agency/add" element={<AddAgency />} />
             <Route path="agency/view/:id" element={<AgencyDetails />} />
             <Route path="agency/edit/:id" element={<EditAgency />} />
-            <Route path="agency/update-subscription/:id" element={<UpdateSubscription />} />
-            <Route path="agency/update-doc-limit/:id" element={<UpdateDocLimit />} />
+
             <Route path="user" element={<UserManagement />} />
             <Route path="user/view/id/:id" element={<UserDetails />} />
             <Route path="auth/:id" element={<UserDetails />} />
