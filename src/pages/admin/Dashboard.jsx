@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../components/AuthContext';
 import { useAgencies } from '../../hooks/useAgencies';
+import { useUsers } from '../../hooks/useUsers';
 import AuditHistory from '../../components/AuditHistory';
 import AgencyStats from '../../components/AgencyStats';
 import dashboardLogo from '../../assets/HeroDashboard.png';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { data: agencies = [], isLoading, error } = useAgencies(false);
+  useUsers(1, 1000, '', false); // Preload users in background
   const [clickedCard, setClickedCard] = useState(null);
+  const { data: agencies = [], isLoading } = useAgencies(false, 1, 1000, '', false); // Match AgencyStats params
   const agencyCount = agencies?.length || 0;
 
   const handleCardClick = (index) => {
