@@ -42,7 +42,7 @@ class AuthService {
   }
 
   async logout() {
-    // No backend logout endpoint needed - session cleared client-side
+    await apiService.post('/auth/logout');
   }
 
   getUser() {

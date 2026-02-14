@@ -17,6 +17,7 @@ const Document = () => {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [files, setFiles] = useState({
     policy: null,
     binder: null,
@@ -45,7 +46,7 @@ const Document = () => {
     setShowError(false);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const errors = [];
     if (!classification) errors.push("Classification");
     if (!files.policy) errors.push("Policy document");
@@ -58,29 +59,29 @@ const Document = () => {
       return;
     }
 
+    setShowConfirm(true);
+  };
+
+  const confirmSubmit = async () => {
+    setShowConfirm(false);
     try {
       const formData = new FormData();
-      
-      // Add all selected files
       Object.values(files).forEach((file) => {
         if (file) {
           formData.append('documents', file);
         }
       });
       
-      // Get agency ID from getById response (agencies array)
       const agencyId =
         userDetails?.agencies?.[0]?.id ||
         userDetails?.agencies?.[0]?.agency_id;
       if (!agencyId) {
-        setErrorMessage(userLoading ? 'Fetching agency details. Please try again.' : 'Unable to identify agency. Please log in again.');
+        setErrorMessage(userLoading ? 'Fetching agency details...' : 'Unable to identify agency.');
         setShowError(true);
         return;
       }
       
-      // Append agency_id
       formData.append('agency_id', agencyId);
-      
       await uploadMutation.mutateAsync(formData);
       setShowSuccess(true);
       setTimeout(() => {
@@ -96,111 +97,76 @@ const Document = () => {
 
   useEffect(() => {
     if (showError) {
-      const timer = setTimeout(() => {
-        setShowError(false);
-      }, 3000);
+      const timer = setTimeout(() => setShowError(false), 5000);
       return () => clearTimeout(timer);
     }
   }, [showError]);
 
+  const uploadedCount = Object.values(files).filter(Boolean).length;
+
   return (
-    <div className="flex flex-col space-y-4 pl-0 pr-0 pt-2 pb-6">
-      {/* Header */}
-      <div className="rounded-2xl border-none p-6 shadow-xl shadow-blue-900/10 relative overflow-hidden bg-[#1B3C53]">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center space-x-5">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-white/20 rounded-xl blur-sm"></div>
-              <div className="relative w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border border-white/20 backdrop-blur-md bg-white/10">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                Document Upload Center
-              </h1>
-              <p className="text-white/70 text-[13px] font-medium max-w-xl mt-1">
-                Securely upload and process your insurance documents with our
-                advanced validation system.
-              </p>
-            </div>
+    <div className="max-w-7xl mx-auto space-y-6 pt-4 animate-in fade-in duration-500">
+      {/* Sleek Compact Header */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+        <div className="flex items-center gap-5 relative z-10">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 shadow-inner">
+            <img src={documentLogo} alt="Icon" className="w-14 h-14 object-contain" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800">Document Submission</h1>
+            <p className="text-sm text-slate-500 font-medium">Manage and upload your insurance policies securely.</p>
           </div>
         </div>
-
-        <img
-          src={documentLogo}
-          alt="Document Upload"
-          className="absolute top-1/2 right-6 -translate-y-1/2 h-40 w-40 md:h-48 md:w-48 object-contain opacity-90 drop-shadow-lg pointer-events-none"
-        />
+        
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="text-right hidden sm:block">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</p>
+            <p className={`text-sm font-bold ${files.policy ? 'text-emerald-500' : 'text-amber-500'}`}>
+              {files.policy ? 'Ready to Submit' : 'Policy Required'}
+            </p>
+          </div>
+          <div className="h-10 w-px bg-slate-200 hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCancel}
+              className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={uploadMutation.isPending || !files.policy || !classification}
+              className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg
+                ${uploadMutation.isPending || !files.policy || !classification
+                  ? 'bg-slate-100 text-slate-400 shadow-none cursor-not-allowed'
+                  : 'bg-[#1B3C53] text-white hover:bg-[#152e42] shadow-blue-900/10'}
+              `}
+            >
+              {uploadMutation.isPending ? 'Processing...' : 'Submit Now'}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="space-y-6">
-        {/* Form Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-xl shadow-blue-900/10 border border-slate-100">
-          <div className="flex items-center mb-6">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mr-3">
-              <svg
-                className="w-4 h-4 text-[#1B3C53]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Control Column */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Information</h3>
             </div>
-            <h3 className="text-[15px] font-bold text-[#1B3C53]">
-              Document Information
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-[9px] font-medium text-slate-400 uppercase tracking-wider mb-2 ml-1">
-                Document Channel
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value="Insurance Policy"
-                  disabled
-                  className="w-full px-4 py-2.5 border border-slate-100 rounded-xl bg-slate-50 text-slate-500 text-[13px] font-semibold"
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <svg
-                    className="w-4 h-4 text-slate-300"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+            
+            <div className="space-y-5">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">
+                  Upload Channel
+                </label>
+                <div className="px-4 py-3 bg-slate-50 rounded-xl border border-slate-100 text-sm font-semibold text-slate-600">
+                  Insurance Policy
                 </div>
               </div>
-            </div>
 
-            <div>
               <CustomSelect
                 label="Classification"
                 value={classification}
@@ -222,171 +188,155 @@ const Document = () => {
               />
             </div>
           </div>
-        </div>
 
-        {/* Document Upload Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-xl shadow-blue-900/10 border border-slate-100">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/30">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
+          <div className="bg-[#1B3C53] rounded-2xl p-6 text-white shadow-lg shadow-blue-900/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
+              <h4 className="text-xs font-bold uppercase tracking-widest">Requirements</h4>
+            </div>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-2 text-xs font-medium text-blue-100">
+                <div className={`w-1.5 h-1.5 rounded-full ${files.policy ? 'bg-emerald-400' : 'bg-amber-400'}`}></div>
+                Policy Document (Required)
+              </li>
+              <li className="flex items-center gap-2 text-xs font-medium text-blue-200">
+                <div className="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+                Max file size: 10MB
+              </li>
+              <li className="flex items-center gap-2 text-xs font-medium text-blue-200">
+                <div className="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+                PDF, DOCX, JPG supported
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Right Content Column */}
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm h-full">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Upload Documents
-                </h3>
-                <p className="text-xs text-slate-600">Select and upload your insurance policy documents</p>
+                <h3 className="text-lg font-bold text-slate-800">Policy Documents</h3>
+                <p className="text-xs text-slate-400 font-medium">Select or drag documents into the appropriate slots.</p>
+              </div>
+              <div className="px-3 py-1 bg-slate-50 rounded-lg border border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                {uploadedCount} File{uploadedCount !== 1 ? 's' : ''} Uploaded
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-slate-100 rounded-lg">
-              <span className="text-xs font-semibold text-slate-700">
-                {Object.values(files).filter(Boolean).length} / {Object.keys(files).length}
-              </span>
-              <span className="text-xs text-slate-500 ml-1">uploaded</span>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <UploadDoc
+                label="Policy*"
+                file={files.policy}
+                onFileChange={(file) => handleFileChange("policy", file)}
+              />
+              <UploadDoc
+                label="Binder"
+                file={files.binder}
+                onFileChange={(file) => handleFileChange("binder", file)}
+              />
+              <UploadDoc
+                label="ACORD"
+                file={files.acord}
+                onFileChange={(file) => handleFileChange("acord", file)}
+              />
+              <UploadDoc
+                label="Prior Policy"
+                file={files.priorPolicy}
+                onFileChange={(file) => handleFileChange("priorPolicy", file)}
+              />
+              <UploadDoc
+                label="Proposal"
+                file={files.proposal}
+                onFileChange={(file) => handleFileChange("proposal", file)}
+              />
+              <UploadDoc
+                label="Quote"
+                file={files.quote}
+                onFileChange={(file) => handleFileChange("quote", file)}
+              />
+              <UploadDoc
+                label="Endorsement"
+                file={files.endorsement}
+                onFileChange={(file) => handleFileChange("endorsement", file)}
+              />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <UploadDoc
-              label="Policy*"
-              file={files.policy}
-              onFileChange={(file) => handleFileChange("policy", file)}
-            />
-            <UploadDoc
-              label="Binder"
-              file={files.binder}
-              onFileChange={(file) => handleFileChange("binder", file)}
-            />
-            <UploadDoc
-              label="ACORD"
-              file={files.acord}
-              onFileChange={(file) => handleFileChange("acord", file)}
-            />
-            <UploadDoc
-              label="Prior Policy"
-              file={files.priorPolicy}
-              onFileChange={(file) => handleFileChange("priorPolicy", file)}
-            />
-            <UploadDoc
-              label="Proposal"
-              file={files.proposal}
-              onFileChange={(file) => handleFileChange("proposal", file)}
-            />
-            <UploadDoc
-              label="Quote"
-              file={files.quote}
-              onFileChange={(file) => handleFileChange("quote", file)}
-            />
-            <UploadDoc
-              label="Endorsement"
-              file={files.endorsement}
-              onFileChange={(file) => handleFileChange("endorsement", file)}
-            />
-          </div>
-
-          <div className="px-6 pb-6 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-            <button
-              onClick={handleCancel}
-              className="px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-xl transition-all border border-slate-300 hover:border-slate-400"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={uploadMutation.isPending}
-              className="px-8 py-3 bg-[#1B3C53] text-white text-sm font-medium rounded-xl hover:bg-[#152e42] transition-all shadow-lg shadow-blue-900/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {uploadMutation.isPending ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing
-                </>
-              ) : (
-                'Submit Documents'
-              )}
-            </button>
           </div>
         </div>
       </div>
 
+      {/* Modern Pop Notifications */}
       {showSuccess && (
-        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right duration-300">
-          <div className="bg-white rounded-lg shadow-xl border border-emerald-200 p-3 max-w-sm">
-            <div className="flex items-center gap-2">
-              <div className="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-emerald-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <p className="flex-1 text-sm text-gray-900">Documents uploaded successfully!</p>
+        <div className="fixed top-6 right-6 z-[100] animate-in slide-in-from-right duration-500">
+          <div className="bg-slate-900 text-white rounded-2xl shadow-2xl p-4 pr-12 flex items-center gap-4 border border-white/10 backdrop-blur-md">
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold">Successfully Uploaded</p>
+              <p className="text-[11px] text-slate-400">Processing documents...</p>
             </div>
           </div>
         </div>
       )}
 
       {showError && (
-        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right duration-300">
-          <div className="bg-white rounded-lg shadow-xl border border-red-200 p-3 max-w-sm">
-            <div className="flex items-center gap-2">
-              <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.732 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+        <div className="fixed top-6 right-6 z-[100] animate-in slide-in-from-right duration-500">
+          <div className="bg-white rounded-2xl shadow-2xl p-4 pr-12 flex items-center gap-4 border border-rose-100">
+            <div className="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.732 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-800">Submission Error</p>
+              <p className="text-[11px] text-slate-500">{errorMessage}</p>
+            </div>
+            <button onClick={() => setShowError(false)} className="absolute top-4 right-4 text-slate-300 hover:text-slate-500 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Confirm Upload</h3>
+                  <p className="text-sm text-slate-600 mt-0.5">Ready to submit {uploadedCount} document{uploadedCount !== 1 ? 's' : ''}?</p>
+                </div>
               </div>
-              <p className="flex-1 text-sm text-gray-900">{errorMessage}</p>
-              <button
-                onClick={() => setShowError(false)}
-                className="flex-shrink-0 text-gray-400 hover:text-gray-600"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-all"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmSubmit}
+                  className="flex-1 px-4 py-2.5 bg-[#1B3C53] hover:bg-[#152e42] text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20"
+                >
+                  Upload
+                </button>
+              </div>
             </div>
           </div>
         </div>
