@@ -9,6 +9,7 @@ const AgentLayout = () => {
   const { user, logout } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const profileMenuRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +24,12 @@ const AgentLayout = () => {
   }, []);
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true);
+    setProfileMenuOpen(false);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(false);
     logout();
   };
 
@@ -196,10 +203,7 @@ const AgentLayout = () => {
                   <div className="border-t border-slate-200"></div>
 
                   <button
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      handleLogout();
-                    }}
+                    onClick={handleLogout}
                     className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-50 transition-colors duration-200 text-left"
                   >
                     <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,6 +224,41 @@ const AgentLayout = () => {
           </div>
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Confirm Logout</h3>
+                  <p className="text-sm text-slate-600 mt-0.5">Are you sure you want to sign out?</p>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-red-600/20"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
