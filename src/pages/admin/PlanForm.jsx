@@ -108,7 +108,7 @@ const PlanForm = () => {
   }
 
   return (
-    <div className={`max-w-5xl mx-auto space-y-6 pb-12 relative transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-500'}`}>
+    <div className={`max-w-5xl mx-auto space-y-6 relative transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-500'}`}>
       <style>
         {`
           input:-webkit-autofill,
@@ -162,30 +162,6 @@ const PlanForm = () => {
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">Define your service plan parameters and pricing</p>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => navigate('/admin/subscription/plans')}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-xl transition-all border border-slate-200"
-              >
-                Cancel
-              </button>
-
-              <button 
-                type="submit"
-                form="plan-form"
-                disabled={createPlanMutation.isPending || updatePlanMutation.isPending}
-                className="px-6 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-xl hover:bg-black transition-all shadow-sm disabled:opacity-70 flex items-center gap-2.5"
-              >
-                {createPlanMutation.isPending || updatePlanMutation.isPending ? (
-                  <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                ) : null}
-                {isEdit ? 'Update Plan' : 'Create Plan'}
-              </button>
             </div>
           </div>
         </div>
@@ -244,6 +220,32 @@ const PlanForm = () => {
                 placeholder="0.00"
               />
             </div>
+
+            <div className="md:col-span-2 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button 
+                type="button"
+                onClick={() => navigate('/admin/subscription/plans')}
+                className="px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-xl transition-all border border-slate-300 hover:border-slate-400"
+              >
+                Cancel
+              </button>
+
+              <button 
+                type="submit"
+                disabled={createPlanMutation.isPending || updatePlanMutation.isPending}
+                className="px-8 py-3 bg-slate-900 text-white text-sm font-medium rounded-xl hover:bg-black transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {createPlanMutation.isPending || updatePlanMutation.isPending ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Processing
+                  </>
+                ) : (isEdit ? 'Update Plan' : 'Create Plan')}
+              </button>
+            </div>
           </div>
         </div>
       </form>
@@ -264,7 +266,7 @@ const Input = ({ label, value, onChange, placeholder, type = "text", error, requ
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder={placeholder}
-        className={`w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-900 transition-all ${disabled ? 'opacity-60 cursor-not-allowed bg-slate-100' : 'hover:border-slate-300 focus:bg-white'} ${error ? "border-rose-400 focus:border-rose-500" : ""}`}
+        className={`w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-900 transition-all ${disabled ? 'opacity-60 cursor-not-allowed bg-slate-100' : 'hover:border-blue-300 hover:shadow-md focus:bg-white'} ${error ? "border-rose-400 focus:border-rose-500" : ""}`}
       />
       {error && (
         <p className="text-[9px] font-medium text-rose-500 flex items-center ml-1 uppercase tracking-widest">

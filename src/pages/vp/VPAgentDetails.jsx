@@ -131,7 +131,7 @@ const VPAgentDetails = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-700 pb-12">
+    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-700">
       <style>
         {`
           @keyframes zoomIn {
@@ -323,7 +323,7 @@ const VPAgentDetails = () => {
 const DetailItem = ({ label, value }) => (
   <div className="space-y-1 group transition-all">
     <label className="text-sm font-medium text-slate-700 ml-1">{label}</label>
-    <div className="text-[13px] font-medium text-slate-900 bg-white border border-slate-300 px-4 py-2.5 rounded-xl group-hover:text-[#1B3C53] group-hover:border-slate-400 transition-all break-words">
+    <div className="text-[13px] font-medium text-slate-900 bg-white border border-slate-300 px-4 py-2.5 rounded-xl group-hover:text-[#1B3C53] group-hover:border-blue-300 group-hover:shadow-md transition-all break-words">
       {value || <span className="text-slate-200">Not Disclosed</span>}
     </div>
   </div>

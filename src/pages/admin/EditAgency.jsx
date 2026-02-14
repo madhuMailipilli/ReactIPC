@@ -8,8 +8,12 @@ const EditAgency = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const returnPage = searchParams.get('returnPage') || '1';
-  const { data: agencyData, isLoading: loading, error: fetchError } = useAgency(id, true);
+  const returnPage = searchParams.get("returnPage") || "1";
+  const {
+    data: agencyData,
+    isLoading: loading,
+    error: fetchError,
+  } = useAgency(id, true);
   const updateAgencyMutation = useUpdateAgency();
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -154,8 +158,8 @@ const EditAgency = () => {
               error.message || "Failed to update agency. Please try again.",
             );
             setShowError(true);
-          }
-        }
+          },
+        },
       );
     }
   };
@@ -164,12 +168,30 @@ const EditAgency = () => {
     return (
       <div className="flex flex-col justify-center items-center min-h-[400px]">
         <div className="relative w-16 h-16 flex items-center justify-center">
-          <img src={logo} alt="IPC Logo" className="w-10 h-10 object-contain z-10" />
-          <svg className="absolute inset-0 w-16 h-16 animate-spin" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="#1B3C53" strokeWidth="4" strokeDasharray="70 200" strokeLinecap="round" />
+          <img
+            src={logo}
+            alt="IPC Logo"
+            className="w-10 h-10 object-contain z-10"
+          />
+          <svg
+            className="absolute inset-0 w-16 h-16 animate-spin"
+            viewBox="0 0 100 100"
+          >
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              fill="none"
+              stroke="#1B3C53"
+              strokeWidth="4"
+              strokeDasharray="70 200"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
-        <span className="mt-4 text-sm font-medium text-slate-600">Loading...</span>
+        <span className="mt-4 text-sm font-medium text-slate-600">
+          Loading...
+        </span>
       </div>
     );
   }
@@ -208,7 +230,7 @@ const EditAgency = () => {
 
   return (
     <div
-      className={`max-w-6xl mx-auto space-y-6 pb-12 relative transition-opacity duration-300 ${isClosing ? "opacity-0" : "opacity-100 animate-in fade-in duration-500"}`}
+      className={`max-w-6xl mx-auto space-y-6 relative transition-opacity duration-300 ${isClosing ? "opacity-0" : "opacity-100 animate-in fade-in duration-500"}`}
     >
       <style>
         {`
@@ -299,48 +321,6 @@ const EditAgency = () => {
                   Edit Agency
                 </h1>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate(-1)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium rounded-xl transition-all uppercase tracking-widest border border-slate-200 hover:border-slate-300"
-              >
-                Cancel Changes
-              </button>
-              <button
-                type="submit"
-                form="edit-agency-form"
-                disabled={updateAgencyMutation.isPending}
-                className="px-6 py-2.5 bg-[#1B3C53] text-white text-[11px] font-medium rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-900/10 disabled:opacity-70 disabled:hover:scale-100 flex items-center gap-2.5 uppercase tracking-widest"
-              >
-                {updateAgencyMutation.isPending ? (
-                  <>
-                    <svg
-                      className="animate-spin h-3.5 w-3.5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Updating
-                  </>
-                ) : (
-                  "Update Agency"
-                )}
-              </button>
             </div>
           </div>
         </div>
@@ -444,7 +424,7 @@ const EditAgency = () => {
                   />
                 </svg>
                 <h2 className="text-base font-bold text-slate-900">
-                  Regional Assignment
+                  Location Details
                 </h2>
               </div>
             </div>
@@ -485,6 +465,74 @@ const EditAgency = () => {
                 placeholder=""
               />
             </div>
+
+            <div className="px-6 pb-6 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  if (agencyData) {
+                    const data =
+                      agencyData.data || agencyData.agency || agencyData;
+                    setFormData({
+                      agencyName: data.agency_name || "",
+                      branchCode: data.branch_code || "",
+                      email: data.email_address || data.email || "",
+                      country: data.country || "",
+                      phone: data.phone_number || data.phone || "",
+                      alternatePhone: data.alternate_phone || "",
+                      address1: data.address_line_1 || data.address1 || "",
+                      address2: data.address_line_2 || data.address2 || "",
+                      pincode: data.postal_code || data.pincode || "",
+                      state: data.state || "",
+                      city: data.city || "",
+                      documentLimit: data.document_limit || "",
+                      startDate: data.start_date
+                        ? data.start_date.split("T")[0]
+                        : "",
+                      endDate: data.end_date ? data.end_date.split("T")[0] : "",
+                      term: data.term || "",
+                    });
+                    setErrors({});
+                  }
+                }}
+                className="px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-xl transition-all border border-slate-300 hover:border-slate-400"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={updateAgencyMutation.isPending}
+                className="px-8 py-3 bg-[#1B3C53] text-white text-sm font-medium rounded-xl hover:bg-[#152e42] transition-all shadow-lg shadow-blue-900/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {updateAgencyMutation.isPending ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Processing
+                  </>
+                ) : (
+                  "Update Agency"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </form>
@@ -511,7 +559,7 @@ const Input = ({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-slate-400 ${
+      className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-blue-300 hover:shadow-md ${
         error ? "border-red-200 ring-4 ring-red-50" : "border-slate-300"
       }`}
     />

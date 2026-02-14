@@ -175,7 +175,7 @@ const AddAgency = () => {
   };
 
   return (
-    <div className={`max-w-6xl mx-auto space-y-6 pb-12 relative transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-500'}`}>
+    <div className={`max-w-6xl mx-auto space-y-6 relative transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-500'}`}>
       <style>
         {`
           input[type="date"]::-webkit-calendar-picker-indicator {
@@ -281,45 +281,17 @@ const AddAgency = () => {
       <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(27,60,83,0.05)] border border-slate-100 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
         <div className="p-6 relative">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <button 
-                onClick={() => navigate('/admin/agency')}
-                className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-all active:scale-90 group"
-              >
-                <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Add New Agency</h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={handleClearForm}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium rounded-xl transition-all uppercase tracking-widest border border-slate-200 hover:border-slate-300"
-              >
-                Clear Form
-              </button>
-
-              <button 
-                type="submit"
-                form="add-agency-form"
-                disabled={createAgencyMutation.isPending}
-                className="px-6 py-2.5 bg-[#1B3C53] text-white text-[11px] font-medium rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-900/10 disabled:opacity-70 disabled:hover:scale-100 flex items-center gap-2.5 uppercase tracking-widest"
-              >
-                {createAgencyMutation.isPending ? (
-                  <>
-                    <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Processing
-                  </>
-                ) : 'Create Agency'}
-              </button>
+          <div className="flex items-center gap-5">
+            <button 
+              onClick={() => navigate('/admin/agency')}
+              className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 transition-all active:scale-90 group"
+            >
+              <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Add New Agency</h1>
             </div>
           </div>
         </div>
@@ -450,6 +422,32 @@ const AddAgency = () => {
                   placeholder="Enter postal code"
                 />
               </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button 
+                  type="button"
+                  onClick={handleClearForm}
+                  className="px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-xl transition-all border border-slate-300 hover:border-slate-400"
+                >
+                  Cancel
+                </button>
+
+                <button 
+                  type="submit"
+                  disabled={createAgencyMutation.isPending}
+                  className="px-8 py-3 bg-[#1B3C53] text-white text-sm font-medium rounded-xl hover:bg-[#152e42] transition-all shadow-lg shadow-blue-900/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {createAgencyMutation.isPending ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Processing
+                    </>
+                  ) : 'Create Agency'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -477,7 +475,7 @@ const Input = ({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-slate-400 ${
+      className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-blue-300 hover:shadow-md ${
         error ? 'border-red-200 ring-4 ring-red-50' : 'border-slate-300'
       }`}
     />
