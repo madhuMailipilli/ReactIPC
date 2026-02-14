@@ -73,7 +73,7 @@ const AgencyDetails = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
       <div className="bg-[#1B3C53] rounded-2xl p-8 relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-24 -mt-24 blur-3xl"></div>
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">

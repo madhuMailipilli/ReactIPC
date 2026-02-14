@@ -229,7 +229,7 @@ const AddUser = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700 pb-16">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
       <style>
         {`
           @keyframes fadeIn {
@@ -690,7 +690,7 @@ const Input = ({
         placeholder={placeholder}
         disabled={disabled}
         rows="3"
-        className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-slate-400 resize-none ${
+        className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-blue-300 hover:shadow-md resize-none ${
           error ? "border-rose-200 ring-4 ring-rose-50" : "border-slate-300"
         } ${disabled ? "bg-slate-50 text-slate-500 cursor-not-allowed" : ""}`}
       />
@@ -702,14 +702,16 @@ const Input = ({
         placeholder={placeholder}
         autoComplete={autoComplete}
         disabled={disabled}
-        className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-slate-400 ${
+        className={`w-full px-4 py-2.5 bg-white border rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#1B3C53]/5 focus:border-[#1B3C53] transition-all duration-300 hover:border-blue-300 hover:shadow-md ${
           error ? "border-rose-200 ring-4 ring-rose-50" : "border-slate-300"
         } ${disabled ? "bg-slate-50 text-slate-500 cursor-not-allowed" : ""}`}
       />
     )}
     {error && (
       <p className="text-[9px] font-medium text-rose-500 flex items-center ml-1 uppercase tracking-widest">
-        <span className="w-1 h-1 bg-rose-500 rounded-full mr-2"></span>
+        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
         {error}
       </p>
     )}
