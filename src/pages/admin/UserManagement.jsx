@@ -288,11 +288,11 @@ const UserManagement = () => {
               label="Agency"
               value={selectedAgency}
               onChange={(value) => setSelectedAgency(value)}
-              options={agencies.map((agency) => ({
+              options={agencies.map((agency, index) => ({
                 value: agency.agency_name,
                 label: agency.agency_name,
+                key: `${agency.agency_name}-${agency.id || agency.agency_id || index}`
               }))}
-              hideSelectOption
               enableAlphabeticSearch={true}
             />
           </div>
@@ -305,7 +305,6 @@ const UserManagement = () => {
                 { value: "VP", label: "VP" },
                 { value: "AGENT", label: "Agent" },
               ]}
-              hideSelectOption
             />
           </div>
         </div>
@@ -470,7 +469,7 @@ const UserManagement = () => {
                             className="fixed inset-0 z-20"
                             onClick={() => setDropdownOpen(null)}
                           ></div>
-                          <div className={`absolute right-0 ${dropdownPosition[i] ? 'bottom-full mb-2' : 'top-full mt-2'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-30 border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[180px]`} onClick={(e) => e.stopPropagation()}>
+                          <div className={`fixed right-0 ${dropdownPosition[i] ? 'bottom-full mb-2' : 'top-full mt-2'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-[9999] border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[180px]`} style={{ top: dropdownPosition[i] ? 'auto' : '100%', left: 'auto', right: '0' }} onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => handleViewUser(user)}
                               className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1B3C53] transition-all group/item"

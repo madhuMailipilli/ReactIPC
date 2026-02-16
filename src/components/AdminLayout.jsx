@@ -153,7 +153,7 @@ const AdminLayout = () => {
         {/* Collapse Toggle Button */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
           {!sidebarCollapsed && (
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Navigation</h3>
+            <h3 className="text-xs text-black tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>Navigation</h3>
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -171,7 +171,7 @@ const AdminLayout = () => {
           {navigationGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="mb-6">
               {!sidebarCollapsed && (
-                <h4 className="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <h4 className="px-3 mb-2 text-[10px] text-black tracking-widest" style={{ fontFamily: 'Inter, sans-serif' }}>
                   {group.title}
                 </h4>
               )}
@@ -189,10 +189,10 @@ const AdminLayout = () => {
                       <div className="relative">
                         <Link
                           to={item.path}
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 group ${
                             isItemActive
                               ? "bg-gradient-to-r from-[#1B3C53] to-[#2D5A7B] text-white shadow-md shadow-blue-900/20"
-                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                              : "text-black hover:bg-slate-100 hover:text-black"
                           }`}
                           title={sidebarCollapsed ? item.label : ""}
                         >
@@ -247,10 +247,10 @@ const AdminLayout = () => {
                               <Link
                                 key={subItem.path}
                                 to={subItem.path}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                                   isSubItemActive
-                                    ? "bg-slate-100 text-[#1B3C53] font-semibold"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                                    ? "bg-slate-100 text-[#1B3C53]"
+                                    : "text-black hover:bg-slate-50 hover:text-black"
                                 }`}
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

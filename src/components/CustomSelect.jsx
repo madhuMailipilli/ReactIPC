@@ -103,11 +103,11 @@ const CustomSelect = ({
           {enableAlphabeticSearch && searchKey && isOpen ? (
             <span className="text-[#1B3C53] font-bold">{searchKey}</span>
           ) : (
-            <span>{selectedOption ? selectedOption.label : `Select ${label}`}</span>
+            <span>{selectedOption ? selectedOption.label : `All ${label}`}</span>
           )}
         </div>
-        <div className="absolute inset-y-0 right-0 flex items-center gap-1 px-3 text-slate-400">
-          {(selectedOption || searchKey) && (
+        <div className="absolute inset-y-0 right-0 flex items-center gap-1 px-3 text-slate-400 pointer-events-none">
+          {selectedOption && !hideSelectOption && (
             <button
               type="button"
               onClick={(e) => {
@@ -123,7 +123,7 @@ const CustomSelect = ({
               </svg>
             </button>
           )}
-          <svg className={`w-3.5 h-3.5 transition-transform pointer-events-none ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -136,12 +136,12 @@ const CustomSelect = ({
               onChange('');
               setIsOpen(false);
             }}
-            className="px-3 py-2 text-[10px] font-medium uppercase tracking-widest cursor-pointer text-slate-400 hover:bg-slate-50 border-b border-slate-50"
+            className="px-3 py-2 text-[12px] font-medium cursor-pointer text-slate-600 hover:bg-slate-50 border-b border-slate-50"
           >
-            Select {label}
+            All {label}
           </div>
         )}
-            <div ref={dropdownRef} className="max-h-[250px] overflow-y-auto custom-scrollbar">
+            <div ref={dropdownRef} className="max-h-[300px] overflow-y-auto custom-scrollbar">
               {filteredOptions.map((option, index) => {
                 const isHighlighted = index === highlightedIndex;
                 const matchLength = searchKey.length;

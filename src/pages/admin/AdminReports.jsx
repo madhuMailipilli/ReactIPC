@@ -458,7 +458,7 @@ const AdminReports = () => {
       </style>
 
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-50 bg-gradient-to-r from-white to-slate-50/30 relative z-10">
+      <div className="px-6 py-4 border-b border-slate-50 bg-gradient-to-r from-white to-slate-50/30 relative z-[50]">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="animate-fadeIn">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Reports & Analytics</h1>
@@ -468,7 +468,7 @@ const AdminReports = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-48 h-[42px]">
+            <div className="w-48 h-[42px] relative z-[10]">
               <CustomSelect
                 label="Agency"
                 value={agency}
@@ -489,7 +489,7 @@ const AdminReports = () => {
               />
             </div>
 
-            <div className="w-28 h-[42px]">
+            <div className="w-28 h-[42px] relative z-[10]">
               <CustomSelect
                 label="Year"
                 value={year}
