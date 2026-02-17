@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiService from '../api/apiService';
 import { useAuth } from '../components/AuthContext';
-
+ 
 // Query Keys
 export const userKeys = {
   all: ['users'],
@@ -10,29 +10,29 @@ export const userKeys = {
   details: (userRole) => [...userKeys.all, 'detail', userRole],
   detail: (id, userRole) => [...userKeys.details(userRole), id],
 };
-
+ 
 // Queries
 export const useUsers = (page = 1, limit = 10, search = '', paginated = false) => {
   const { user, isAuthenticated } = useAuth();
   const userRole = user?.role_id || user?.role;
-  
+ 
   return useQuery({
     queryKey: userKeys.list({ page, limit, search, paginated }, userRole),
     queryFn: async () => {
       // If not paginated, we use a very large limit to get all users for management
       const effectiveLimit = paginated ? limit : 1000;
-      const params = { 
-        page: paginated ? page : 1, 
-        limit: effectiveLimit, 
-        search 
+      const params = {
+        page: paginated ? page : 1,
+        limit: effectiveLimit,
+        search
       };
-      
+     
       const response = await apiService.get('/auth/get-all-users', { params });
-      
+     
       let items = [];
       let total = null;
       let totalPages = null;
-
+ 
       // Handle different response structures
       const resData = response.data;
       if (resData?.data?.users && Array.isArray(resData.data.users)) {
@@ -50,7 +50,7 @@ export const useUsers = (page = 1, limit = 10, search = '', paginated = false) =
       } else if (Array.isArray(resData)) {
         items = resData;
       }
-
+ 
       // Deep search for total if still null
       if (total === null && resData) {
         total = resData.total ?? resData.totalCount ?? resData.count ?? resData.total_count ?? resData.users_total ?? resData.pagination?.total ?? resData.meta?.total;
@@ -58,18 +58,18 @@ export const useUsers = (page = 1, limit = 10, search = '', paginated = false) =
       if (totalPages === null && resData) {
         totalPages = resData.totalPages ?? resData.total_pages ?? resData.pages ?? resData.pagination?.totalPages ?? resData.meta?.totalPages ?? resData.pagination?.total_pages;
       }
-
+ 
       if (paginated) {
         const pageSize = parseInt(limit);
         const totalCount = total !== null ? parseInt(total) : items.length;
         let calculatedTotalPages = totalPages !== null ? parseInt(totalPages) : Math.ceil(totalCount / pageSize);
-        
-        // If the API returns exactly the page size, but we don't have total info, 
+       
+        // If the API returns exactly the page size, but we don't have total info,
         // assume there might be more pages.
         if (total === null && totalPages === null && items.length === pageSize) {
           calculatedTotalPages = Math.max(calculatedTotalPages, page + 1);
         }
-
+ 
         let paginatedItems = items;
         if (items.length > pageSize) {
           const startIndex = (page - 1) * pageSize;
@@ -78,7 +78,7 @@ export const useUsers = (page = 1, limit = 10, search = '', paginated = false) =
             calculatedTotalPages = Math.ceil(items.length / pageSize);
           }
         }
-
+ 
         return {
           items: paginatedItems,
           total: totalCount,
@@ -86,19 +86,19 @@ export const useUsers = (page = 1, limit = 10, search = '', paginated = false) =
           currentPage: page,
         };
       }
-      
+     
       return items;
     },
     enabled: isAuthenticated,
     placeholderData: (previousData) => previousData,
   });
 };
-
+ 
 export const useUser = (id) => {
   const { user, isAuthenticated } = useAuth();
   const userRole = user?.role_id || user?.role;
   const queryClient = useQueryClient();
-  
+ 
   return useQuery({
     queryKey: userKeys.detail(id, userRole),
     queryFn: () => apiService.get(`/auth/${id}`).then(res => res.data.data),
@@ -107,7 +107,7 @@ export const useUser = (id) => {
       if (!id) return undefined;
       const cachedLists = queryClient.getQueriesData({ queryKey: userKeys.lists(userRole) });
       const normalizedId = String(id);
-
+ 
       for (const [, data] of cachedLists) {
         if (!data) continue;
         const items = Array.isArray(data) ? data : data.items;
@@ -118,18 +118,18 @@ export const useUser = (id) => {
         });
         if (match) return match;
       }
-
+ 
       return undefined;
     },
   });
 };
-
+ 
 // Mutations
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userRole = user?.role_id || user?.role;
-  
+ 
   return useMutation({
     mutationFn: (userData) => apiService.post('/auth/register', userData).then(res => res.data),
     onSuccess: () => {
@@ -137,12 +137,12 @@ export const useCreateUser = () => {
     },
   });
 };
-
+ 
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userRole = user?.role_id || user?.role;
-  
+ 
   return useMutation({
     mutationFn: ({ id, data }) => apiService.put(`/auth/${id}`, data).then(res => res.data),
     onSuccess: (_, { id }) => {
@@ -151,12 +151,12 @@ export const useUpdateUser = () => {
     },
   });
 };
-
+ 
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userRole = user?.role_id || user?.role;
-  
+ 
   return useMutation({
     mutationFn: (id) => apiService.delete(`/auth/${id}`).then(res => res.data),
     onSuccess: () => {
@@ -164,17 +164,20 @@ export const useDeleteUser = () => {
     },
   });
 };
-
+ 
 export const useResetPassword = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userRole = user?.role_id || user?.role;
-  
+ 
   return useMutation({
-    mutationFn: ({ userId, newPassword }) => 
-      apiService.put(`/auth/reset-password/${userId}`, { password: newPassword }).then(res => res.data),
+    mutationFn: async ({ userId, newPassword }) => {
+      const response = await apiService.post('/auth/admin/reset-password', { user_id: userId, new_password: newPassword });
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists(userRole) });
     },
   });
 };
+ 

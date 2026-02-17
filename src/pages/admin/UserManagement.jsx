@@ -35,7 +35,12 @@ const UserManagement = () => {
   const [deleteModal, setDeleteModal] = useState({ show: false, user: null });
   const [resetPasswordModal, setResetPasswordModal] = useState({ show: false, user: null });
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showResetSuccess, setShowResetSuccess] = useState(false);
+  const [showResetError, setShowResetError] = useState(false);
+  const [resetErrorMessage, setResetErrorMessage] = useState('');
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -114,10 +119,14 @@ const UserManagement = () => {
     setResetPasswordModal({ show: true, user });
     setDropdownOpen(null);
     setNewPassword('');
+    setConfirmPassword('');
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const confirmResetPassword = async () => {
-    if (!newPassword.trim()) return;
+    if (!newPassword.trim() || !confirmPassword.trim()) return;
+    if (newPassword !== confirmPassword) return;
     
     const userId = resetPasswordModal.user.id || resetPasswordModal.user.user_id;
     
@@ -127,6 +136,7 @@ const UserManagement = () => {
         onSuccess: () => {
           setResetPasswordModal({ show: false, user: null });
           setNewPassword('');
+          setConfirmPassword('');
           setShowResetSuccess(true);
           setTimeout(() => {
             setIsClosing(true);
@@ -138,6 +148,20 @@ const UserManagement = () => {
         },
         onError: (error) => {
           console.error('Error resetting password:', error);
+          console.error('Error response:', error.response?.data);
+          console.error('Error status:', error.response?.status);
+          setResetPasswordModal({ show: false, user: null });
+          const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to reset password';
+          setResetErrorMessage(errorMsg);
+          setShowResetError(true);
+          setTimeout(() => {
+            setIsClosing(true);
+            setTimeout(() => {
+              setShowResetError(false);
+              setIsClosing(false);
+              setResetErrorMessage('');
+            }, 300);
+          }, 3000);
         }
       }
     );
@@ -216,6 +240,31 @@ const UserManagement = () => {
         </div>
       )}
 
+      {/* Error Notification for Password Reset */}
+      {showResetError && (
+        <div className={`fixed top-6 right-6 z-[60] ${isClosing ? 'opacity-0 scale-95 transition-all duration-300' : 'animate-fadeIn'}`}>
+          <div className="bg-white/90 backdrop-blur-md text-slate-900 px-5 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.1)] flex items-center border border-rose-100 min-w-[320px]">
+            <div className="mr-4 flex-shrink-0 w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="font-normal text-sm text-slate-900">Password Reset Failed</p>
+              <p className="text-xs text-slate-500 font-normal">{resetErrorMessage}</p>
+            </div>
+            <button 
+              onClick={() => setShowResetError(false)}
+              className="text-slate-400 hover:text-slate-600 transition-colors p-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-50 bg-gradient-to-r from-white to-slate-50/30">
         <div className="flex flex-col sm:flex-row lg:flex-row justify-between items-start sm:items-center lg:items-center gap-4">
@@ -280,6 +329,7 @@ const UserManagement = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by username or email..."
+              autoComplete="off"
               className="block w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[13px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B3C53]/10 focus:border-[#1B3C53] transition-all"
             />
           </div>
@@ -449,7 +499,13 @@ const UserManagement = () => {
                           if (newIndex !== null) {
                             const rect = e.currentTarget.getBoundingClientRect();
                             const spaceBelow = window.innerHeight - rect.bottom;
-                            setDropdownPosition({ [i]: spaceBelow < 280 });
+                            const shouldFlipUp = spaceBelow < 280;
+                            setDropdownPosition({ 
+                              [i]: {
+                                shouldFlipUp: shouldFlipUp,
+                                flipUp: shouldFlipUp
+                              }
+                            });
                           }
                         }}
                         className={`p-1.5 rounded-lg transition-all ${dropdownOpen === i ? "bg-slate-100 text-[#1B3C53]" : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"}`}
@@ -469,7 +525,7 @@ const UserManagement = () => {
                             className="fixed inset-0 z-20"
                             onClick={() => setDropdownOpen(null)}
                           ></div>
-                          <div className={`fixed right-0 ${dropdownPosition[i] ? 'bottom-full mb-2' : 'top-full mt-2'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-[9999] border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[180px]`} style={{ top: dropdownPosition[i] ? 'auto' : '100%', left: 'auto', right: '0' }} onClick={(e) => e.stopPropagation()}>
+                          <div className={`absolute right-0 ${dropdownPosition[i]?.flipUp ? 'bottom-full mb-1' : 'top-full mt-1'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-[9999] border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[180px]`}>
                             <button
                               onClick={() => handleViewUser(user)}
                               className="flex items-center w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1B3C53] transition-all group/item"
@@ -669,9 +725,9 @@ const UserManagement = () => {
 
           <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner">
+              <div className="w-16 h-16 bg-[#1B3C53]/10 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner">
                 <svg
-                  className="w-8 h-8 text-blue-500"
+                  className="w-8 h-8 text-[#1B3C53]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -695,27 +751,87 @@ const UserManagement = () => {
                 </span>
               </p>
 
-              <div className="mb-6">
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+              <div className="space-y-4 mb-6">
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    autoComplete="new-password"
+                    className="w-full px-4 py-3 pr-12 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1B3C53]/20 focus:border-[#1B3C53] transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showNewPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    autoComplete="new-password"
+                    className={`w-full px-4 py-3 pr-12 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                      confirmPassword && newPassword !== confirmPassword
+                        ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
+                        : 'border-slate-200 focus:ring-[#1B3C53]/20 focus:border-[#1B3C53]'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showConfirmPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {confirmPassword && newPassword !== confirmPassword && (
+                  <p className="text-xs text-rose-500 font-medium">Passwords do not match</p>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2.5">
                 <button
                   onClick={() => setResetPasswordModal({ show: false, user: null })}
-                  className="flex-1 px-4 py-2.5 text-xs font-normal text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest"
+                  className="flex-1 px-3.5 py-2 text-[11px] font-normal text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmResetPassword}
-                  disabled={!newPassword.trim() || resetPasswordMutation.isPending}
-                  className="flex-1 px-4 py-2.5 bg-blue-500 text-white text-xs font-medium rounded-xl hover:bg-blue-600 transition-all shadow-xl shadow-blue-200 active:scale-95 uppercase tracking-widest disabled:opacity-50"
+                  disabled={!newPassword.trim() || !confirmPassword.trim() || newPassword !== confirmPassword || resetPasswordMutation.isPending}
+                  className="flex-1 px-3.5 py-2 text-white text-[11px] font-medium rounded-xl transition-all shadow-xl uppercase tracking-widest disabled:opacity-50"
+                  style={{ 
+                    background: "linear-gradient(to right, #1B3C53, #2D5A7B)",
+                    transform: "scale(1)"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
+                  onMouseUp={(e) => e.currentTarget.style.transform = "scale(1.05)"}
                 >
                   {resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
                 </button>
