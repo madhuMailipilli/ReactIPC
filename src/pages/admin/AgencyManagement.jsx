@@ -598,7 +598,13 @@ const AgencyManagement = () => {
                               if (newIndex !== null) {
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 const spaceBelow = window.innerHeight - rect.bottom;
-                                setDropdownPosition({ [index]: spaceBelow < 250 });
+                                const shouldFlipUp = spaceBelow < 250;
+                                setDropdownPosition({ 
+                                  [index]: {
+                                    shouldFlipUp: shouldFlipUp,
+                                    flipUp: shouldFlipUp
+                                  }
+                                });
                               }
                             }}
                             className={`p-1.5 rounded-lg transition-all ${
@@ -623,7 +629,7 @@ const AgencyManagement = () => {
                                     onClick={() => setDropdownOpen(null)}
                                   ></div>
                                   <div
-                                    className={`absolute right-0 ${dropdownPosition[index] ? 'bottom-full mb-2' : 'top-full mt-2'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-30 border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[160px] lg:min-w-[180px]`}
+                                    className={`absolute right-0 ${dropdownPosition[index]?.flipUp ? 'bottom-full mb-2' : 'top-full mt-2'} bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-30 border border-slate-200/60 py-2 animate-zoomIn overflow-hidden min-w-[160px] lg:min-w-[180px]`}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <button
